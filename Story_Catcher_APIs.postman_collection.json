@@ -1,0 +1,195 @@
+{
+  "info": {
+    "_postman_id": "story-catcher-backend-apis",
+    "name": "Story Catcher Backend APIs",
+    "description": "Complete API collection for testing the Story Catcher backend endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Check if the server is running and healthy"
+      },
+      "response": []
+    },
+    {
+      "name": "Start Story Session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"message\": \"I'm ready\"\n}"
+                },
+        "url": {
+          "raw": "{{base_url}}/api/story/start",
+          "host": ["{{base_url}}"],
+          "path": ["api", "story", "start"]
+        },
+        "description": "Start a new story interview session"
+      },
+      "response": []
+    },
+    {
+      "name": "Submit Answer 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+                    "raw": "{\n    \"session_id\": \"{{session_id}}\",\n    \"answer\": \"I fell down the stairs and it was so scary\",\n    \"question_number\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/story/answer",
+          "host": ["{{base_url}}"],
+          "path": ["api", "story", "answer"]
+        },
+        "description": "Submit answer to question 1"
+      },
+      "response": []
+    },
+    {
+      "name": "Submit Answer 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+                    "raw": "{\n    \"session_id\": \"{{session_id}}\",\n    \"answer\": \"Feeling distracted I was on phone and didn't see the stairs\",\n    \"question_number\": 2\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/story/answer",
+          "host": ["{{base_url}}"],
+          "path": ["api", "story", "answer"]
+        },
+        "description": "Submit answer to question 2"
+      },
+      "response": []
+    },
+    {
+      "name": "Submit Answer 3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+                    "raw": "{\n    \"session_id\": \"{{session_id}}\",\n    \"answer\": \"Hurt a bit then I came back to my senses after 10 sec\",\n    \"question_number\": 3\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/story/answer",
+          "host": ["{{base_url}}"],
+          "path": ["api", "story", "answer"]
+        },
+        "description": "Submit answer to question 3"
+      },
+      "response": []
+    },
+    {
+      "name": "Submit Answer 4",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+                    "raw": "{\n    \"session_id\": \"{{session_id}}\",\n    \"answer\": \"It made me more careful and aware of my surroundings. I now pay attention when walking and avoid using my phone on stairs\",\n    \"question_number\": 4\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/story/answer",
+          "host": ["{{base_url}}"],
+          "path": ["api", "story", "answer"]
+        },
+        "description": "Submit answer to question 4 (final answer - will generate story)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Current Question",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/story/current-question/{{session_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "story", "current-question", "{{session_id}}"]
+        },
+        "description": "Get the current question for a session"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Session Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/story/session/{{session_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "story", "session", "{{session_id}}"]
+        },
+        "description": "Get complete session data including all answers"
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "session_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

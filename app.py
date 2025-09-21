@@ -1,0 +1,27 @@
+from flask import Flask
+from flask_cors import CORS
+from dotenv import load_dotenv
+import os
+
+# Load environment variables
+load_dotenv()
+
+def create_app():
+    app = Flask(__name__)
+    
+    # Enable CORS for all routes
+    CORS(app)
+    
+    # Configuration
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
+    app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
+    
+    # Register blueprints
+    from routes.story_routes import story_bp
+    app.register_blueprint(story_bp, url_prefix='/api')
+    
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True, host='0.0.0.0', port=5000)
