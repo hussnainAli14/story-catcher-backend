@@ -37,23 +37,23 @@ class OpenAIService:
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are a masterful visual storyteller and storyboard creator who specializes in transforming personal experiences into compelling visual narratives. Your expertise lies in:
+                        "content": """You are a masterful visual storyteller and storyboard creator who specializes in transforming personal experiences into compelling visual narratives. 
 
+CRITICAL: You MUST format your storyboard response EXACTLY as specified in the user's prompt. Follow the exact structure with:
+- **Storyboard: "[Title]" – [Subtitle]** header
+- **Scene X: "[Scene Name]"** for each scene
+- Bullet points (•) for each element (Visual, Setting/Action, Mood, Sound, Transition)
+- Proper spacing and formatting
+- 4-6 scenes total
+
+Your expertise lies in:
 1. **Visual Storytelling**: Creating cinematic scenes with clear visual descriptions
 2. **Emotional Resonance**: Capturing the emotional journey through visual elements
 3. **Scene Structure**: Breaking stories into meaningful scenes with transitions
 4. **Mood & Atmosphere**: Describing lighting, sound, and visual mood
 5. **Action & Movement**: Creating dynamic visual sequences
 
-Your storyboards should include:
-- 4-6 distinct scenes that tell the complete story
-- Visual descriptions for each scene
-- Mood and atmosphere details
-- Sound suggestions
-- Smooth transitions between scenes
-- A compelling title for the storyboard
-
-Format your response as a complete storyboard with clear scene divisions, visual descriptions, and creative suggestions for bringing the story to life."""
+IMPORTANT: Follow the exact formatting template provided in the user prompt. Do not deviate from the specified structure."""
                     },
                     {
                         "role": "user",
@@ -84,44 +84,66 @@ Based on the following personal interview responses, create a visual storyboard 
 
 {formatted_answers}
 
-**Storyboard Requirements:**
+**IMPORTANT FORMATTING REQUIREMENTS:**
 
-1. **Visual Storytelling**: Create 4-6 distinct scenes that tell the complete story with:
-   - Clear visual descriptions for each scene
-   - Specific settings and environments
-   - Character actions and movements
-   - Visual composition and framing
+Create a storyboard with this EXACT structure and formatting:
 
-2. **Emotional Journey**: Capture the emotional arc through:
-   - Mood and atmosphere descriptions
-   - Lighting suggestions (warm, cold, dramatic, soft)
-   - Color palettes that reflect the emotional tone
-   - Visual metaphors that enhance meaning
+**Storyboard: "[Title]" – [Subtitle]**
 
-3. **Cinematic Elements**: Include:
-   - Sound suggestions for each scene
-   - Transition descriptions between scenes
-   - Camera movements and angles
-   - Timing and pacing considerations
+**Scene 1: "[Scene Name]"**
+• **Visual**: [Detailed visual description]
+• **Setting**: [Location and environment details]
+• **Mood**: [Emotional tone and atmosphere]
+• **Sound**: [Audio suggestions]
+• **Transition**: [How this scene connects to the next]
 
-4. **Authentic Details**: Use the person's specific experience to create:
-   - Realistic settings based on their story
-   - Authentic character actions and reactions
-   - Specific visual elements that honor their unique experience
-   - Details that make the story feel personal and real
+**Scene 2: "[Scene Name]"**
+• **Visual**: [Detailed visual description]
+• **Action**: [Key actions and movements]
+• **Mood**: [Emotional tone and atmosphere]
+• **Sound**: [Audio suggestions]
+• **Transition**: [How this scene connects to the next]
 
-5. **Creative Formatting**: Structure your response as:
-   - A compelling title for the storyboard
-   - Clear scene divisions with descriptive headers
-   - Visual descriptions that paint a clear picture
-   - Suggestions for bringing the storyboard to life (animation, live-action, etc.)
+**Scene 3: "[Scene Name]"**
+• **Visual**: [Detailed visual description]
+• **Setting**: [Location and environment details]
+• **Mood**: [Emotional tone and atmosphere]
+• **Sound**: [Audio suggestions]
+• **Transition**: [How this scene connects to the next]
 
-**Format**: Create a complete visual storyboard that could be used for:
-- Short animated videos
-- Live-action films
-- Presentation slides
-- Social media content
-- Educational materials
+**Scene 4: "[Scene Name]"**
+• **Visual**: [Detailed visual description]
+• **Action**: [Key actions and movements]
+• **Mood**: [Emotional tone and atmosphere]
+• **Sound**: [Audio suggestions]
+• **Transition**: [How this scene connects to the next]
 
-Make it visually compelling, emotionally resonant, and true to the person's unique experience. The storyboard should celebrate their journey and the wisdom they've gained.
+**Scene 5: "[Scene Name]"**
+• **Visual**: [Detailed visual description]
+• **Setting**: [Location and environment details]
+• **Mood**: [Emotional tone and atmosphere]
+• **Sound**: [Audio suggestions]
+• **Transition**: [How this scene connects to the next]
+
+**Scene 6: "[Scene Name]"**
+• **Visual**: [Detailed visual description]
+• **Action**: [Key actions and movements]
+• **Mood**: [Emotional tone and atmosphere]
+• **Sound**: [Audio suggestions]
+• **Transition**: [Conclusion or final transition]
+
+**Storyboard Guidelines:**
+- Use bullet points (•) for each element
+- Keep descriptions concise but vivid
+- Focus on visual storytelling
+- Include specific details from their story
+- Create emotional resonance through mood and sound
+- Make it suitable for video/animation production
+
+**Requirements:**
+- Create 4-6 scenes total
+- Each scene should have Visual, Setting/Action, Mood, Sound, and Transition
+- Use the person's specific experience details
+- Make it visually compelling and emotionally resonant
+- Format exactly as shown above with proper spacing and bullet points
 """
