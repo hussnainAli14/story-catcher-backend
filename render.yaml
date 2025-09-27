@@ -1,0 +1,12 @@
+# Render configuration for story-catcher-backend Python API
+# This file tells Render how to build and deploy the Flask app
+
+# Build command
+pip install -r requirements.txt
+
+# Start command
+gunicorn app:app
+
+# Environment
+FLASK_ENV=production
+PYTHON_VERSION=3.11.0
