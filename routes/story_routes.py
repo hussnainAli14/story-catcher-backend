@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.story_service import StoryService
 from services.openai_service import OpenAIService
+from services.videogen_service import VideoGenService
 from models.story_models import StorySession, Question, StoryResponse
 import json
 
@@ -9,6 +10,7 @@ story_bp = Blueprint('story', __name__)
 # Initialize services
 story_service = StoryService()
 openai_service = OpenAIService()
+videogen_service = VideoGenService()
 
 @story_bp.route('/story/start', methods=['POST'])
 def start_story_session():
@@ -69,12 +71,22 @@ def submit_answer():
         if question_number >= 4:
             # Generate story using OpenAI
             story_data = story_service.get_session_data(session_id)
-            generated_story = openai_service.generate_story(story_data)
+            formatted_answers = story_service.get_all_answers_for_story_generation(session_id)
+            generated_story = openai_service.generate_story_from_formatted_answers(formatted_answers)
+            
+            # Generate video from storyboard using VideoGen
+            video_url = None
+            try:
+                video_url = openai_service.generate_video_from_storyboard(generated_story)
+            except Exception as e:
+                print(f"Video generation failed: {e}")
+                video_url = None
             
             return jsonify({
                 'success': True,
                 'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nNow that we have your four answers, I\'m going to turn them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.',
                 'storyboard': generated_story,
+                'video_url': video_url,
                 'session_complete': True,
                 'question_number': question_number,
                 'total_questions': 4
@@ -156,6 +168,92 @@ def get_session_status(session_id):
         return jsonify({
             'success': True,
             'session_data': session_data
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@story_bp.route('/video/generate', methods=['POST'])
+def generate_video():
+    """
+    Generate a video from a text script using VideoGen API
+    """
+    try:
+        data = request.get_json()
+        script = data.get('script')
+        
+        if not script:
+            return jsonify({
+                'success': False,
+                'message': 'Script is required'
+            }), 400
+        
+        # Generate video using VideoGen
+        video_url = openai_service.generate_video_from_script(script)
+        
+        return jsonify({
+            'success': True,
+            'video_url': video_url,
+            'message': 'Video generated successfully'
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@story_bp.route('/video/generate-from-storyboard', methods=['POST'])
+def generate_video_from_storyboard():
+    """
+    Generate a video from a storyboard using VideoGen API
+    """
+    try:
+        data = request.get_json()
+        storyboard = data.get('storyboard')
+        
+        if not storyboard:
+            return jsonify({
+                'success': False,
+                'message': 'Storyboard is required'
+            }), 400
+        
+        # Generate video using VideoGen
+        video_url = openai_service.generate_video_from_storyboard(storyboard)
+        
+        return jsonify({
+            'success': True,
+            'video_url': video_url,
+            'message': 'Video generated successfully from storyboard'
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@story_bp.route('/video/status/<api_file_id>', methods=['GET'])
+def get_video_status(api_file_id):
+    """
+    Get the status of a video generation using VideoGen API
+    """
+    try:
+        if not api_file_id:
+            return jsonify({
+                'success': False,
+                'message': 'API file ID is required'
+            }), 400
+        
+        # Get video status from VideoGen
+        result = videogen_service.get_video_file(api_file_id)
+        
+        return jsonify({
+            'success': True,
+            'result': result
         })
     
     except Exception as e:
