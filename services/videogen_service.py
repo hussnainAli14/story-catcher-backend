@@ -30,22 +30,24 @@ class VideoGenService:
             truncated_script = self._truncate_script_for_duration(script)
             
             payload = {
-                "script": truncated_script
+                "script": truncated_script,
+                "aspectRatio": {
+                    "width": 9,
+                    "height": 16
+                }
             }
             
-            # Add video format parameters if supported by API
-            # Note: These parameters may not be supported by VideoGen API
-            # but we include them in case they are added in the future
-            video_params = {
-                "orientation": "portrait",  # Vertical format
-                "aspect_ratio": "9:16",    # Mobile-friendly aspect ratio
-                "duration_limit": 60        # Max 60 seconds
-            }
-            
-            # Only add parameters if they don't cause API errors
-            # payload.update(video_params)  # Commented out until API supports these
+            # VideoGen API supports aspectRatio parameter for vertical format
+            # 9:16 aspect ratio creates vertical/portrait videos perfect for mobile
             
             response = requests.post(url, headers=self.headers, json=payload)
+            
+            # Better error handling
+            if response.status_code != 200:
+                error_detail = response.text
+                print(f"VideoGen API Error {response.status_code}: {error_detail}")
+                raise Exception(f"VideoGen API request failed with status {response.status_code}: {error_detail}")
+            
             response.raise_for_status()
             
             result = response.json()
