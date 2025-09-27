@@ -142,27 +142,41 @@ class VideoGenService:
             Dict: Final video file information
         """
         start_time = time.time()
+        poll_count = 0
         
         while time.time() - start_time < max_wait_time:
             try:
+                poll_count += 1
+                print(f"Polling video status (attempt {poll_count}) for {api_file_id}")
+                
                 result = self.get_video_file(api_file_id)
                 loading_state = result.get('loadingState')
                 
+                print(f"Video status: {loading_state}")
+                
                 if loading_state == 'FULFILLED':
+                    print(f"Video completed successfully: {result}")
                     return result
                 elif loading_state == 'REJECTED':
                     raise Exception("Video generation was rejected")
                 
                 # Still processing, wait and try again
+                print(f"Video still processing, waiting {poll_interval} seconds...")
                 time.sleep(poll_interval)
                 
             except Exception as e:
-                if "Failed to fetch video data" in str(e):
-                    # Video might still be processing
+                print(f"Polling error (attempt {poll_count}): {str(e)}")
+                if "Failed to fetch video data" in str(e) or "404" in str(e):
+                    # Video might still be processing or API might be slow
+                    print(f"Video might still be processing, waiting {poll_interval} seconds...")
                     time.sleep(poll_interval)
                     continue
                 else:
-                    raise e
+                    # For other errors, don't fail immediately, try a few more times
+                    if poll_count >= 3:
+                        raise e
+                    time.sleep(poll_interval)
+                    continue
         
         raise Exception(f"Video generation timed out after {max_wait_time} seconds")
     
@@ -183,10 +197,14 @@ class VideoGenService:
             # Generate video
             api_file_id = self.generate_video_from_script(script)
             
-            # Wait for completion and get the final video URL
-            result = self.wait_for_video_completion(api_file_id)
-            
-            return result.get('apiFileSignedUrl')
+            # Try to wait for completion, but don't fail if it times out
+            try:
+                result = self.wait_for_video_completion(api_file_id, max_wait_time=60, poll_interval=5)
+                return result.get('apiFileSignedUrl')
+            except Exception as wait_error:
+                print(f"Video completion wait failed: {wait_error}")
+                # Return a placeholder URL or the apiFileId for manual checking
+                return f"https://videogen.io/file/{api_file_id}"
             
         except Exception as e:
             raise Exception(f"Storyboard to video generation error: {str(e)}")
