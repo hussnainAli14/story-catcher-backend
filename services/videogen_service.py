@@ -197,14 +197,10 @@ class VideoGenService:
             # Generate video
             api_file_id = self.generate_video_from_script(script)
             
-            # Try to wait for completion, but don't fail if it times out
-            try:
-                result = self.wait_for_video_completion(api_file_id, max_wait_time=60, poll_interval=5)
-                return result.get('apiFileSignedUrl')
-            except Exception as wait_error:
-                print(f"Video completion wait failed: {wait_error}")
-                # Return a placeholder URL or the apiFileId for manual checking
-                return f"https://videogen.io/file/{api_file_id}"
+            # Return the apiFileId immediately to avoid worker timeout
+            # Video processing will continue in background
+            print(f"Video generation initiated successfully with ID: {api_file_id}")
+            return f"https://videogen.io/file/{api_file_id}"
             
         except Exception as e:
             raise Exception(f"Storyboard to video generation error: {str(e)}")
