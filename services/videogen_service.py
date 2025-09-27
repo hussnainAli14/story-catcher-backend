@@ -29,6 +29,10 @@ class VideoGenService:
             # Truncate script to ensure max 1 minute duration (approximately 150 words)
             truncated_script = self._truncate_script_for_duration(script)
             
+            print(f"VideoGen API Key: {self.api_key[:10]}..." if self.api_key else "No API key")
+            print(f"Script length: {len(truncated_script)} characters")
+            print(f"Truncated script preview: {truncated_script[:100]}...")
+            
             payload = {
                 "script": truncated_script,
                 "aspectRatio": {
@@ -37,10 +41,13 @@ class VideoGenService:
                 }
             }
             
-            # VideoGen API supports aspectRatio parameter for vertical format
-            # 9:16 aspect ratio creates vertical/portrait videos perfect for mobile
+            print(f"Sending request to VideoGen API: {url}")
+            print(f"Payload: {payload}")
             
-            response = requests.post(url, headers=self.headers, json=payload)
+            response = requests.post(url, headers=self.headers, json=payload, timeout=30)
+            
+            print(f"VideoGen API Response Status: {response.status_code}")
+            print(f"VideoGen API Response Headers: {dict(response.headers)}")
             
             # Better error handling
             if response.status_code != 200:
@@ -51,6 +58,8 @@ class VideoGenService:
             response.raise_for_status()
             
             result = response.json()
+            print(f"VideoGen API Response: {result}")
+            
             api_file_id = result.get('apiFileId')
             
             if not api_file_id:
@@ -59,8 +68,10 @@ class VideoGenService:
             return api_file_id
             
         except requests.exceptions.RequestException as e:
+            print(f"Request exception: {str(e)}")
             raise Exception(f"VideoGen API request failed: {str(e)}")
         except Exception as e:
+            print(f"General exception: {str(e)}")
             raise Exception(f"Video generation error: {str(e)}")
     
     def _truncate_script_for_duration(self, script: str, max_words: int = 150) -> str:

@@ -365,12 +365,17 @@ Create a storyboard with this EXACT structure and formatting:
             if not storyboard:
                 raise Exception("No storyboard provided for video generation")
             
+            print(f"Starting video generation from storyboard...")
+            print(f"Storyboard length: {len(storyboard)} characters")
+            
             # Use VideoGen service to generate video from storyboard
             video_url = self.videogen_service.generate_video_from_storyboard(storyboard)
             
+            print(f"Video generation completed successfully: {video_url}")
             return video_url
             
         except Exception as e:
+            print(f"Video generation error in OpenAI service: {str(e)}")
             raise Exception(f"Video generation error: {str(e)}")
     
     def generate_video_from_script(self, script: str) -> str:

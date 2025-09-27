@@ -77,7 +77,9 @@ def submit_answer():
             # Generate video from storyboard using VideoGen
             video_url = None
             try:
+                print(f"Attempting video generation for session {session_id}")
                 video_url = openai_service.generate_video_from_storyboard(generated_story)
+                print(f"Video generation successful: {video_url}")
             except Exception as e:
                 print(f"Video generation failed: {e}")
                 video_url = None
