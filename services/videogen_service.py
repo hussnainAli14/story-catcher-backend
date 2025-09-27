@@ -197,10 +197,23 @@ class VideoGenService:
             # Generate video
             api_file_id = self.generate_video_from_script(script)
             
-            # Return the apiFileId immediately to avoid worker timeout
-            # Video processing will continue in background
-            print(f"Video generation initiated successfully with ID: {api_file_id}")
-            return f"https://videogen.io/file/{api_file_id}"
+            # Try to get the video file immediately (might still be processing)
+            try:
+                result = self.get_video_file(api_file_id)
+                loading_state = result.get('loadingState')
+                
+                if loading_state == 'FULFILLED':
+                    video_url = result.get('apiFileSignedUrl')
+                    if video_url:
+                        print(f"Video completed immediately: {video_url}")
+                        return video_url
+                
+                print(f"Video still processing (status: {loading_state}), returning apiFileId for later retrieval")
+                return f"videogen://{api_file_id}"
+                
+            except Exception as e:
+                print(f"Could not get video status immediately: {e}")
+                return f"videogen://{api_file_id}"
             
         except Exception as e:
             raise Exception(f"Storyboard to video generation error: {str(e)}")
