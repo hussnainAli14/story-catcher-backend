@@ -75,7 +75,7 @@ def submit_answer():
             print(f"Session data retrieved: {story_data is not None}")
             formatted_answers = story_service.get_all_answers_for_story_generation(session_id)
             print(f"Formatted answers: {formatted_answers}")
-            generated_story = openai_service.generate_storyboard_from_formatted_answers(formatted_answers)
+            generated_story = openai_service.generate_story_from_formatted_answers(formatted_answers)
             print(f"Generated story response: {generated_story}")
             
             # Check if storyboard is still generating
