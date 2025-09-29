@@ -78,23 +78,13 @@ def submit_answer():
             generated_story = openai_service.generate_story_from_formatted_answers(formatted_answers)
             print(f"Generated story length: {len(generated_story) if generated_story else 0}")
             
-            # Generate video from storyboard using VideoGen
-            video_url = None
-            try:
-                print(f"Attempting video generation for session {session_id}")
-                video_url = openai_service.generate_video_from_storyboard(generated_story)
-                print(f"Video generation initiated: {video_url}")
-            except Exception as e:
-                print(f"Video generation failed: {e}")
-                import traceback
-                traceback.print_exc()
-                video_url = None
+            # Store the generated storyboard in the session for later video generation
+            story_service.save_generated_storyboard(session_id, generated_story)
             
             return jsonify({
                 'success': True,
                 'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nNow that we have your four answers, I\'m going to turn them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.',
                 'storyboard': generated_story,
-                'video_url': video_url,
                 'session_complete': True,
                 'question_number': question_number,
                 'total_questions': 4
@@ -215,6 +205,69 @@ def generate_video():
         })
     
     except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@story_bp.route('/video/generate-from-session', methods=['POST'])
+def generate_video_from_session():
+    """
+    Generate a video from a completed story session
+    """
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        email = data.get('email', '')  # Optional email
+        
+        if not session_id:
+            return jsonify({
+                'success': False,
+                'message': 'Session ID is required'
+            }), 400
+        
+        # Get the stored storyboard from the session
+        storyboard = story_service.get_generated_storyboard(session_id)
+        if not storyboard:
+            return jsonify({
+                'success': False,
+                'message': 'No storyboard found for this session'
+            }), 404
+        
+        # Generate video from storyboard
+        video_url = None
+        try:
+            print(f"Generating video for session {session_id}")
+            video_url = openai_service.generate_video_from_storyboard(storyboard)
+            print(f"Video generation initiated: {video_url}")
+        except Exception as e:
+            print(f"Video generation failed: {e}")
+            import traceback
+            traceback.print_exc()
+            video_url = None
+        
+        # Store email and video info in session for later saving to Supabase
+        if email:
+            story_service.save_user_email(session_id, email)
+        
+        # Save to Supabase when video is ready
+        if video_url and video_url.startswith('videogen://'):
+            # Video is still processing, will save when ready
+            pass
+        elif video_url:
+            # Video is ready, save to Supabase
+            story_service.save_to_supabase(session_id, video_url)
+        
+        return jsonify({
+            'success': True,
+            'video_url': video_url,
+            'message': 'Video generation started'
+        })
+    
+    except Exception as e:
+        print(f"Error in generate_video_from_session: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e)

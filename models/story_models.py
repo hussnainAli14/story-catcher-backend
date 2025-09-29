@@ -27,6 +27,7 @@ class StorySession:
     current_question: int
     is_complete: bool
     generated_story: Optional[str] = None
+    user_email: Optional[str] = None
     
     def to_dict(self):
         return {
@@ -35,7 +36,8 @@ class StorySession:
             'answers': [asdict(answer) for answer in self.answers],
             'current_question': self.current_question,
             'is_complete': self.is_complete,
-            'generated_story': self.generated_story
+            'generated_story': self.generated_story,
+            'user_email': self.user_email
         }
 
 @dataclass

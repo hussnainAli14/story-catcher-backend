@@ -224,3 +224,76 @@ class StoryService:
         
         print(f"Formatted {len(formatted_answers)} answers for story generation")
         return formatted_answers
+    
+    def save_generated_storyboard(self, session_id, storyboard):
+        """Save the generated storyboard to the session"""
+        if session_id not in self.sessions:
+            print(f"Session {session_id} not found")
+            return False
+        
+        session = self.sessions[session_id]
+        session.generated_story = storyboard
+        print(f"Saved storyboard for session {session_id}")
+        return True
+    
+    def get_generated_storyboard(self, session_id):
+        """Get the generated storyboard from the session"""
+        if session_id not in self.sessions:
+            print(f"Session {session_id} not found")
+            return None
+        
+        session = self.sessions[session_id]
+        return session.generated_story
+    
+    def save_user_email(self, session_id, email):
+        """Save user email to the session"""
+        if session_id not in self.sessions:
+            print(f"Session {session_id} not found")
+            return False
+        
+        session = self.sessions[session_id]
+        session.user_email = email
+        print(f"Saved email {email} for session {session_id}")
+        return True
+    
+    def save_to_supabase(self, session_id, video_url):
+        """Save the completed story to Supabase"""
+        if session_id not in self.sessions:
+            print(f"Session {session_id} not found")
+            return False
+        
+        session = self.sessions[session_id]
+        
+        if not session.user_email:
+            print(f"No email found for session {session_id}, skipping Supabase save")
+            return False
+        
+        try:
+            import os
+            from supabase import create_client
+            
+            # Get Supabase client
+            supabase_url = os.getenv('SUPABASE_URL')
+            supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+            
+            if not supabase_url or not supabase_key:
+                print("Supabase credentials not found")
+                return False
+            
+            supabase = create_client(supabase_url, supabase_key)
+            
+            # Save to Supabase
+            response = supabase.table('story_submissions').insert([
+                {
+                    'email': session.user_email,
+                    'video_url': video_url,
+                    'created_at': session.created_at.isoformat()
+                }
+            ]).execute()
+            
+            print(f"Saved story to Supabase for session {session_id}")
+            return True
+            
+        except Exception as e:
+            print(f"Error saving to Supabase: {e}")
+            return False
