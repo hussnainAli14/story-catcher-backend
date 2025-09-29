@@ -76,19 +76,31 @@ def submit_answer():
             formatted_answers = story_service.get_all_answers_for_story_generation(session_id)
             print(f"Formatted answers: {formatted_answers}")
             generated_story = openai_service.generate_story_from_formatted_answers(formatted_answers)
-            print(f"Generated story length: {len(generated_story) if generated_story else 0}")
+            print(f"Generated story response: {generated_story}")
             
-            # Store the generated storyboard in the session for later video generation
-            story_service.save_generated_storyboard(session_id, generated_story)
-            
-            return jsonify({
-                'success': True,
-                'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nNow that we have your four answers, I\'m going to turn them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.',
-                'storyboard': generated_story,
-                'session_complete': True,
-                'question_number': question_number,
-                'total_questions': 4
-            })
+            # Check if storyboard is still generating
+            if generated_story == "STORYBOARD_GENERATING":
+                return jsonify({
+                    'success': True,
+                    'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nNow that we have your four answers, I\'m going to turn them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.',
+                    'storyboard': None,
+                    'storyboard_generating': True,
+                    'session_complete': True,
+                    'question_number': question_number,
+                    'total_questions': 4
+                })
+            else:
+                # Store the generated storyboard in the session for later video generation
+                story_service.save_generated_storyboard(session_id, generated_story)
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nNow that we have your four answers, I\'m going to turn them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.',
+                    'storyboard': generated_story,
+                    'session_complete': True,
+                    'question_number': question_number,
+                    'total_questions': 4
+                })
         else:
             # Get next question
             next_question = story_service.get_next_question(session_id)
@@ -324,6 +336,32 @@ def get_video_status(api_file_id):
         })
     
     except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@story_bp.route('/storyboard/status/<session_id>', methods=['GET'])
+def get_storyboard_status(session_id):
+    """
+    Get the status of storyboard generation for a session
+    """
+    try:
+        status = openai_service.get_storyboard_status(session_id)
+        
+        if status['status'] == 'completed':
+            # Store the completed storyboard in the session
+            story_service.save_generated_storyboard(session_id, status['storyboard'])
+        
+        return jsonify({
+            'success': True,
+            'status': status['status'],
+            'storyboard': status.get('storyboard'),
+            'timestamp': status.get('timestamp')
+        })
+    
+    except Exception as e:
+        print(f"Error checking storyboard status: {str(e)}")
         return jsonify({
             'success': False,
             'error': str(e)

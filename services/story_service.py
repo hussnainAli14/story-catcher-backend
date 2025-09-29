@@ -211,7 +211,8 @@ class StoryService:
                 formatted_answers.append({
                     'question': question.text,
                     'answer': answer.answer_text,
-                    'category': question.category
+                    'category': question.category,
+                    'session_id': session_id
                 })
             except StopIteration:
                 print(f"Question with ID {answer.question_id} not found")
@@ -219,7 +220,8 @@ class StoryService:
                 formatted_answers.append({
                     'question': f"Question {answer.question_id}",
                     'answer': answer.answer_text,
-                    'category': 'unknown'
+                    'category': 'unknown',
+                    'session_id': session_id
                 })
         
         print(f"Formatted {len(formatted_answers)} answers for story generation")

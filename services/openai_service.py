@@ -47,51 +47,99 @@ class OpenAIService:
                 prompt = prompt[:3000] + "\n\n[Content truncated for faster processing]"
                 print(f"Prompt truncated to {len(prompt)} characters")
             
-            # Generate the storyboard using OpenAI
-            response = self._get_client().chat.completions.create(
-                model="gpt-4",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": """You are a masterful visual storyteller and storyboard creator who specializes in transforming personal experiences into compelling visual narratives. 
-
-CRITICAL INSTRUCTIONS:
-1. You MUST use ONLY the specific details provided in the user's answers
-2. Do NOT add generic content, scenarios, or unrelated content that the user didn't mention
-3. Focus EXACTLY on what the person described in their responses
-4. Use their exact words, locations, and experiences
-5. Do NOT invent scenarios - stick to their actual story
-
-FORMATTING REQUIREMENTS:
-You MUST format your storyboard response EXACTLY as specified:
-- **Storyboard: "[Title]" – [Subtitle]** header
-- **Scene X: "[Scene Name]"** for each scene
-- Bullet points (•) for each element (Visual, Setting/Action, Mood, Sound, Transition)
-- Proper spacing and formatting
-- 4-6 scenes total
-
-Your expertise lies in:
-1. **Accurate Storytelling**: Using ONLY the details from the user's answers
-2. **Visual Storytelling**: Creating cinematic scenes based on their specific experience
-3. **Emotional Resonance**: Capturing their actual emotional journey
-4. **Scene Structure**: Breaking their story into meaningful scenes
-5. **Authentic Details**: Using their specific locations, actions, and feelings
-
-IMPORTANT: Follow the exact formatting template AND use only the details from their answers. Do not invent scenarios."""
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                max_tokens=1500,
-                temperature=0.8
-            )
+            # Start asynchronous storyboard generation
+            print("Starting asynchronous storyboard generation")
+            import threading
+            import time
             
-            return response.choices[0].message.content.strip()
+            # Store the session ID for background processing
+            session_id = formatted_answers[0].get('session_id', 'unknown')
+            
+            # Start background thread for OpenAI API call
+            def generate_storyboard_async():
+                try:
+                    print(f"Background thread: Starting OpenAI API call for session {session_id}")
+                    response = self._get_client().chat.completions.create(
+                        model="gpt-4o-mini",  # Faster model
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": """You are a masterful visual storyteller. Create a storyboard based on the user's personal experience. Use ONLY their specific details. Format as:
+
+**Storyboard: "[Title]" – [Subtitle]**
+
+**Scene 1: "[Scene Name]"**
+• **Visual**: [description]
+• **Setting**: [description]
+• **Mood**: [description]
+• **Sound**: [description]
+• **Transition**: [description]
+
+Create 4-5 scenes total."""
+                            },
+                            {
+                                "role": "user",
+                                "content": prompt[:2000]  # Truncate for speed
+                            }
+                        ],
+                        max_tokens=800,
+                        temperature=0.7,
+                        timeout=20
+                    )
+                    
+                    result = response.choices[0].message.content.strip()
+                    print(f"Background thread: OpenAI API completed for session {session_id}")
+                    
+                    # Store the result in a global cache (in production, use Redis or database)
+                    if not hasattr(self, '_storyboard_cache'):
+                        self._storyboard_cache = {}
+                    self._storyboard_cache[session_id] = {
+                        'status': 'completed',
+                        'storyboard': result,
+                        'timestamp': time.time()
+                    }
+                    
+                except Exception as e:
+                    print(f"Background thread: OpenAI API failed for session {session_id}: {str(e)}")
+                    # Store fallback result
+                    if not hasattr(self, '_storyboard_cache'):
+                        self._storyboard_cache = {}
+                    self._storyboard_cache[session_id] = {
+                        'status': 'completed',
+                        'storyboard': self._create_fallback_storyboard(formatted_answers),
+                        'timestamp': time.time()
+                    }
+            
+            # Start the background thread
+            thread = threading.Thread(target=generate_storyboard_async)
+            thread.daemon = True
+            thread.start()
+            
+            # Initialize cache entry
+            if not hasattr(self, '_storyboard_cache'):
+                self._storyboard_cache = {}
+            self._storyboard_cache[session_id] = {
+                'status': 'generating',
+                'storyboard': None,
+                'timestamp': time.time()
+            }
+            
+            # Return immediately with generating status
+            return "STORYBOARD_GENERATING"
             
         except Exception as e:
-            return f"I apologize, but I encountered an error while generating your storyboard: {str(e)}"
+            print(f"Error in generate_story_from_formatted_answers: {str(e)}")
+            return self._create_fallback_storyboard(formatted_answers)
+    
+    def get_storyboard_status(self, session_id: str) -> dict:
+        """Get the status of storyboard generation for a session"""
+        if not hasattr(self, '_storyboard_cache'):
+            return {'status': 'not_found'}
+        
+        if session_id not in self._storyboard_cache:
+            return {'status': 'not_found'}
+        
+        return self._storyboard_cache[session_id]
     
     def generate_story_from_formatted_answers(self, formatted_answers: List[Dict]) -> str:
         """
