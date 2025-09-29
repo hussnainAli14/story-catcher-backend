@@ -42,6 +42,11 @@ class OpenAIService:
             # Create the prompt for storyboard generation
             prompt = self._create_storyboard_prompt(formatted_answers)
             
+            # Truncate prompt if too long to prevent timeout
+            if len(prompt) > 3000:
+                prompt = prompt[:3000] + "\n\n[Content truncated for faster processing]"
+                print(f"Prompt truncated to {len(prompt)} characters")
+            
             # Generate the storyboard using OpenAI
             response = self._get_client().chat.completions.create(
                 model="gpt-4",
@@ -151,13 +156,14 @@ IMPORTANT: Follow the exact formatting template AND use only the details from th
                             "content": prompt
                         }
                     ],
-                    max_tokens=1500,
+                    max_tokens=1000,  # Reduced for faster response
                     temperature=0.8,
-                    timeout=30  # Add timeout to prevent hanging
+                    timeout=10  # Reduced timeout for Render worker limits
                 )
                 print("OpenAI API call completed successfully")
             except Exception as openai_error:
                 print(f"OpenAI API call failed: {str(openai_error)}")
+                print(f"Error type: {type(openai_error).__name__}")
                 # Return a fallback storyboard if OpenAI fails
                 return self._create_fallback_storyboard(formatted_answers)
             
@@ -168,6 +174,7 @@ IMPORTANT: Follow the exact formatting template AND use only the details from th
         except Exception as e:
             error_msg = f"I apologize, but I encountered an error while generating your storyboard: {str(e)}"
             print(f"OpenAI service error: {error_msg}")
+            print(f"Error type: {type(e).__name__}")
             import traceback
             traceback.print_exc()
             # Return fallback storyboard instead of error message
