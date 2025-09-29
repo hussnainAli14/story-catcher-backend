@@ -69,19 +69,25 @@ def submit_answer():
         
         # Check if all questions are answered
         if question_number >= 4:
+            print(f"Processing final answer for session {session_id}")
             # Generate story using OpenAI
             story_data = story_service.get_session_data(session_id)
+            print(f"Session data retrieved: {story_data is not None}")
             formatted_answers = story_service.get_all_answers_for_story_generation(session_id)
+            print(f"Formatted answers: {formatted_answers}")
             generated_story = openai_service.generate_story_from_formatted_answers(formatted_answers)
+            print(f"Generated story length: {len(generated_story) if generated_story else 0}")
             
             # Generate video from storyboard using VideoGen
             video_url = None
             try:
                 print(f"Attempting video generation for session {session_id}")
                 video_url = openai_service.generate_video_from_storyboard(generated_story)
-                print(f"Video generation successful: {video_url}")
+                print(f"Video generation initiated: {video_url}")
             except Exception as e:
                 print(f"Video generation failed: {e}")
+                import traceback
+                traceback.print_exc()
                 video_url = None
             
             return jsonify({
@@ -110,6 +116,12 @@ def submit_answer():
             })
     
     except Exception as e:
+        print(f"Error in submit_answer: {str(e)}")
+        print(f"Session ID: {session_id}")
+        print(f"Question Number: {question_number}")
+        print(f"Answer: {answer}")
+        import traceback
+        traceback.print_exc()
         return jsonify({
             'success': False,
             'error': str(e)

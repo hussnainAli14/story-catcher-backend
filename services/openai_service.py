@@ -93,8 +93,12 @@ IMPORTANT: Follow the exact formatting template AND use only the details from th
         Generate a visual storyboard based on properly formatted answers
         """
         try:
-            if len(formatted_answers) < 4:
-                return "I need all four answers to generate your storyboard. Please complete the interview first."
+            print(f"Starting story generation with {len(formatted_answers)} answers")
+            
+            if not formatted_answers or len(formatted_answers) < 4:
+                error_msg = f"I need all four answers to generate your storyboard. Please complete the interview first. Received {len(formatted_answers) if formatted_answers else 0} answers."
+                print(error_msg)
+                return error_msg
             
             # Format the answers for the prompt
             formatted_text = self._format_formatted_answers_for_prompt(formatted_answers)
@@ -106,8 +110,10 @@ IMPORTANT: Follow the exact formatting template AND use only the details from th
             
             # Create the prompt for storyboard generation
             prompt = self._create_storyboard_prompt(formatted_text)
+            print(f"Prompt length: {len(prompt)} characters")
             
             # Generate the storyboard using OpenAI
+            print("Calling OpenAI API...")
             response = self._get_client().chat.completions.create(
                 model="gpt-4",
                 messages=[
@@ -148,10 +154,16 @@ IMPORTANT: Follow the exact formatting template AND use only the details from th
                 temperature=0.8
             )
             
-            return response.choices[0].message.content.strip()
+            result = response.choices[0].message.content.strip()
+            print(f"OpenAI response length: {len(result)} characters")
+            return result
             
         except Exception as e:
-            return f"I apologize, but I encountered an error while generating your storyboard: {str(e)}"
+            error_msg = f"I apologize, but I encountered an error while generating your storyboard: {str(e)}"
+            print(f"OpenAI service error: {error_msg}")
+            import traceback
+            traceback.print_exc()
+            return error_msg
     
     def _format_answers_for_prompt(self, answers: List[Dict]) -> str:
         """Format answers for the story generation prompt"""

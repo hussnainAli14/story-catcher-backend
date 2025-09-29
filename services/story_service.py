@@ -197,18 +197,30 @@ class StoryService:
     def get_all_answers_for_story_generation(self, session_id):
         """Get formatted answers for story generation"""
         if session_id not in self.sessions:
+            print(f"Session {session_id} not found in sessions")
             return None
         
         session = self.sessions[session_id]
+        print(f"Session has {len(session.answers)} answers")
         
         # Format answers with questions for context
         formatted_answers = []
         for answer in session.answers:
-            question = next(q for q in self.questions if q.id == answer.question_id)
-            formatted_answers.append({
-                'question': question.text,
-                'answer': answer.answer_text,
-                'category': question.category
-            })
+            try:
+                question = next(q for q in self.questions if q.id == answer.question_id)
+                formatted_answers.append({
+                    'question': question.text,
+                    'answer': answer.answer_text,
+                    'category': question.category
+                })
+            except StopIteration:
+                print(f"Question with ID {answer.question_id} not found")
+                # Fallback for missing questions
+                formatted_answers.append({
+                    'question': f"Question {answer.question_id}",
+                    'answer': answer.answer_text,
+                    'category': 'unknown'
+                })
         
+        print(f"Formatted {len(formatted_answers)} answers for story generation")
         return formatted_answers

@@ -44,7 +44,8 @@ class VideoGenService:
             print(f"Sending request to VideoGen API: {url}")
             print(f"Payload: {payload}")
             
-            response = requests.post(url, headers=self.headers, json=payload, timeout=30)
+            # Reduce timeout to prevent worker crashes
+            response = requests.post(url, headers=self.headers, json=payload, timeout=15)
             
             print(f"VideoGen API Response Status: {response.status_code}")
             print(f"VideoGen API Response Headers: {dict(response.headers)}")
@@ -67,6 +68,9 @@ class VideoGenService:
             
             return api_file_id
             
+        except requests.exceptions.Timeout:
+            print("VideoGen API request timed out")
+            raise Exception("Video generation request timed out")
         except requests.exceptions.RequestException as e:
             print(f"Request exception: {str(e)}")
             raise Exception(f"VideoGen API request failed: {str(e)}")
@@ -188,34 +192,25 @@ class VideoGenService:
             storyboard (str): The storyboard text
             
         Returns:
-            str: The final video URL
+            str: The final video URL or apiFileId for later retrieval
         """
         try:
+            print(f"Converting storyboard to script...")
             # Convert storyboard to a script format suitable for VideoGen
             script = self._convert_storyboard_to_script(storyboard)
+            print(f"Script conversion complete, length: {len(script)}")
             
             # Generate video
+            print(f"Starting video generation...")
             api_file_id = self.generate_video_from_script(script)
+            print(f"Video generation initiated, apiFileId: {api_file_id}")
             
-            # Try to get the video file immediately (might still be processing)
-            try:
-                result = self.get_video_file(api_file_id)
-                loading_state = result.get('loadingState')
-                
-                if loading_state == 'FULFILLED':
-                    video_url = result.get('apiFileSignedUrl')
-                    if video_url:
-                        print(f"Video completed immediately: {video_url}")
-                        return video_url
-                
-                print(f"Video still processing (status: {loading_state}), returning apiFileId for later retrieval")
-                return f"videogen://{api_file_id}"
-                
-            except Exception as e:
-                print(f"Could not get video status immediately: {e}")
-                return f"videogen://{api_file_id}"
+            # Return the apiFileId immediately to prevent timeout
+            # The frontend will poll for completion
+            return f"videogen://{api_file_id}"
             
         except Exception as e:
+            print(f"Storyboard to video generation error: {str(e)}")
             raise Exception(f"Storyboard to video generation error: {str(e)}")
     
     def _convert_storyboard_to_script(self, storyboard: str) -> str:
