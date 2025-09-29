@@ -114,12 +114,13 @@ IMPORTANT: Follow the exact formatting template AND use only the details from th
             
             # Generate the storyboard using OpenAI
             print("Calling OpenAI API...")
-            response = self._get_client().chat.completions.create(
-                model="gpt-4",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": """You are a masterful visual storyteller and storyboard creator who specializes in transforming personal experiences into compelling visual narratives. 
+            try:
+                response = self._get_client().chat.completions.create(
+                    model="gpt-4",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": """You are a masterful visual storyteller and storyboard creator who specializes in transforming personal experiences into compelling visual narratives. 
 
 CRITICAL INSTRUCTIONS:
 1. You MUST use ONLY the specific details provided in the user's answers
@@ -144,15 +145,21 @@ Your expertise lies in:
 5. **Authentic Details**: Using their specific locations, actions, and feelings
 
 IMPORTANT: Follow the exact formatting template AND use only the details from their answers. Do not invent scenarios."""
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
-                max_tokens=1500,
-                temperature=0.8
-            )
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    max_tokens=1500,
+                    temperature=0.8,
+                    timeout=30  # Add timeout to prevent hanging
+                )
+                print("OpenAI API call completed successfully")
+            except Exception as openai_error:
+                print(f"OpenAI API call failed: {str(openai_error)}")
+                # Return a fallback storyboard if OpenAI fails
+                return self._create_fallback_storyboard(formatted_answers)
             
             result = response.choices[0].message.content.strip()
             print(f"OpenAI response length: {len(result)} characters")
@@ -163,7 +170,8 @@ IMPORTANT: Follow the exact formatting template AND use only the details from th
             print(f"OpenAI service error: {error_msg}")
             import traceback
             traceback.print_exc()
-            return error_msg
+            # Return fallback storyboard instead of error message
+            return self._create_fallback_storyboard(formatted_answers)
     
     def _format_answers_for_prompt(self, answers: List[Dict]) -> str:
         """Format answers for the story generation prompt"""
@@ -481,3 +489,70 @@ Create a storyboard with this EXACT structure and formatting:
             
         except Exception as e:
             raise Exception(f"Pika Labs error: {str(e)}")
+    
+    def _create_fallback_storyboard(self, formatted_answers: List[Dict]) -> str:
+        """Create a simple fallback storyboard when OpenAI fails"""
+        try:
+            if not formatted_answers or len(formatted_answers) < 4:
+                return "**Storyboard: \"Personal Journey\" – A Story of Growth**\n\n**Scene 1: \"The Moment\"**\n• **Visual**: A person in a meaningful moment of realization\n• **Setting**: A quiet, reflective environment\n• **Mood**: Contemplative and transformative\n• **Sound**: Gentle, ambient sounds\n• **Transition**: Fade to next scene\n\n**Scene 2: \"The Change\"**\n• **Visual**: The same person showing growth and understanding\n• **Action**: Moving forward with new perspective\n• **Mood**: Hopeful and determined\n• **Sound**: Uplifting, inspiring music\n• **Transition**: Smooth transition to conclusion\n\n**Scene 3: \"The Impact\"**\n• **Visual**: The person applying their new understanding\n• **Setting**: Daily life with positive changes\n• **Mood**: Peaceful and content\n• **Sound**: Warm, comforting tones\n• **Transition**: Fade to end"
+            
+            # Extract key themes from answers
+            first_answer = formatted_answers[0].get('answer', '')
+            last_answer = formatted_answers[-1].get('answer', '')
+            
+            # Create a simple storyboard based on the answers
+            title = "Personal Transformation"
+            if "listening" in first_answer.lower():
+                title = "The Power of Listening"
+            elif "change" in first_answer.lower():
+                title = "A Moment of Change"
+            elif "realized" in first_answer.lower():
+                title = "A Realization"
+            
+            return f"""**Storyboard: "{title}" – A Journey of Growth**
+
+**Scene 1: "The Beginning"**
+• **Visual**: A person in their everyday environment
+• **Setting**: The place where their story began
+• **Mood**: Ordinary, perhaps unaware
+• **Sound**: Ambient daily sounds
+• **Transition**: Focus shifts to the moment
+
+**Scene 2: "The Moment"**
+• **Visual**: The pivotal moment of realization or change
+• **Action**: The key action or decision that changed everything
+• **Mood**: Intense, transformative
+• **Sound**: Music that builds tension and release
+• **Transition**: The aftermath begins
+
+**Scene 3: "The Aftermath"**
+• **Visual**: The person processing what happened
+• **Setting**: A reflective space, perhaps alone
+• **Mood**: Contemplative, processing
+• **Sound**: Quieter, more introspective
+• **Transition**: Moving toward understanding
+
+**Scene 4: "The Change"**
+• **Visual**: The person showing their transformation
+• **Action**: Applying their new understanding
+• **Mood**: Confident, peaceful, or determined
+• **Sound**: Uplifting, hopeful music
+• **Transition**: Integration into daily life
+
+**Scene 5: "The New Normal"**
+• **Visual**: The person in their transformed state
+• **Setting**: Their daily life, but changed
+• **Mood**: Content, aligned, at peace
+• **Sound**: Warm, satisfying tones
+• **Transition**: The story continues
+
+**Scene 6: "The Impact"**
+• **Visual**: How this change affects others around them
+• **Action**: Sharing wisdom or living their values
+• **Mood**: Inspiring, meaningful
+• **Sound**: Full, rich, complete
+• **Transition**: The journey continues"""
+            
+        except Exception as e:
+            print(f"Error creating fallback storyboard: {e}")
+            return "**Storyboard: \"Your Story\" – A Personal Journey**\n\n**Scene 1: \"The Beginning\"**\n• **Visual**: Your story begins here\n• **Setting**: The place where it all started\n• **Mood**: Setting the stage for transformation\n• **Sound**: The sounds of your experience\n• **Transition**: Moving toward the moment\n\n**Scene 2: \"The Moment\"**\n• **Visual**: The pivotal experience\n• **Action**: The key moment of change\n• **Mood**: The emotions of that time\n• **Sound**: The soundtrack of your story\n• **Transition**: Processing what happened\n\n**Scene 3: \"The Change\"**\n• **Visual**: How you transformed\n• **Setting**: Your new reality\n• **Mood**: The peace of understanding\n• **Sound**: Music of growth and wisdom\n• **Transition**: Living your new truth"
