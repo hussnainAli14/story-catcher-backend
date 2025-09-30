@@ -305,18 +305,18 @@ def generate_video_from_storyboard():
         # Generate video using VideoGen
         video_url = openai_service.generate_video_from_storyboard(storyboard)
         
-        # Save email immediately if provided
+        # Store email temporarily in session (don't save to Supabase yet)
         if email and session_id:
             try:
-                print(f"Saving email {email} for session {session_id}")
+                print(f"Storing email {email} temporarily for session {session_id}")
                 story_service.save_user_email(session_id, email)
                 
                 # If video is ready (not videogen://), save to Supabase immediately
                 if video_url and not video_url.startswith('videogen://'):
-                    print(f"Saving video {video_url} to Supabase for session {session_id}")
+                    print(f"Saving video {video_url} and email to Supabase for session {session_id}")
                     story_service.save_to_supabase(session_id, video_url)
             except Exception as e:
-                print(f"Failed to save email/video to Supabase: {e}")
+                print(f"Failed to store email or save to Supabase: {e}")
         
         return jsonify({
             'success': True,
