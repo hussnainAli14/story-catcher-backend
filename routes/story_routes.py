@@ -308,8 +308,6 @@ def generate_video_from_storyboard():
         # Save email immediately if provided
         if email and session_id:
             try:
-                from services.story_service import StoryService
-                story_service = StoryService()
                 print(f"Saving email {email} for session {session_id}")
                 story_service.save_user_email(session_id, email)
                 
@@ -351,8 +349,6 @@ def save_video_to_supabase():
         
         # Save to Supabase
         try:
-            from services.story_service import StoryService
-            story_service = StoryService()
             print(f"Saving final video {video_url} to Supabase for session {session_id}")
             success = story_service.save_to_supabase(session_id, video_url)
             
@@ -378,6 +374,47 @@ def save_video_to_supabase():
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 500
+
+
+@story_bp.route('/test-supabase', methods=['GET'])
+def test_supabase():
+    """
+    Test Supabase connection and table access
+    """
+    try:
+        import os
+        from supabase import create_client
+        
+        # Get Supabase client
+        supabase_url = os.getenv('SUPABASE_URL')
+        supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
+        
+        if not supabase_url or not supabase_key:
+            return jsonify({
+                'success': False,
+                'error': 'Supabase credentials not found',
+                'url': supabase_url,
+                'key': 'None' if not supabase_key else f'{supabase_key[:10]}...'
+            }), 500
+        
+        supabase = create_client(supabase_url, supabase_key)
+        
+        # Test table access
+        response = supabase.table('story_submissions').select('*').limit(1).execute()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Supabase connection successful',
+            'table_accessible': True,
+            'sample_data': response.data
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Supabase connection failed'
         }), 500
 
 

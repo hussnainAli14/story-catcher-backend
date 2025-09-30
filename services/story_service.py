@@ -249,22 +249,29 @@ class StoryService:
     
     def save_user_email(self, session_id, email):
         """Save user email to the session"""
+        print(f"Attempting to save email {email} for session {session_id}")
+        print(f"Available sessions: {list(self.sessions.keys())}")
+        
         if session_id not in self.sessions:
-            print(f"Session {session_id} not found")
+            print(f"Session {session_id} not found in sessions")
             return False
         
         session = self.sessions[session_id]
         session.user_email = email
-        print(f"Saved email {email} for session {session_id}")
+        print(f"Successfully saved email {email} for session {session_id}")
         return True
     
     def save_to_supabase(self, session_id, video_url):
         """Save the completed story to Supabase"""
+        print(f"Attempting to save to Supabase for session {session_id} with video {video_url}")
+        print(f"Available sessions: {list(self.sessions.keys())}")
+        
         if session_id not in self.sessions:
-            print(f"Session {session_id} not found")
+            print(f"Session {session_id} not found in sessions")
             return False
         
         session = self.sessions[session_id]
+        print(f"Session found, user_email: {session.user_email}")
         
         if not session.user_email:
             print(f"No email found for session {session_id}, skipping Supabase save")
@@ -278,22 +285,28 @@ class StoryService:
             supabase_url = os.getenv('SUPABASE_URL')
             supabase_key = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
             
+            print(f"Supabase URL: {supabase_url}")
+            print(f"Supabase Key: {supabase_key[:10]}..." if supabase_key else "None")
+            
             if not supabase_url or not supabase_key:
                 print("Supabase credentials not found")
                 return False
             
             supabase = create_client(supabase_url, supabase_key)
             
-            # Save to Supabase
-            response = supabase.table('story_submissions').insert([
-                {
-                    'email': session.user_email,
-                    'video_url': video_url,
-                    'created_at': session.created_at.isoformat()
-                }
-            ]).execute()
+            # Prepare data for Supabase
+            data_to_insert = {
+                'email': session.user_email,
+                'video_url': video_url,
+                'created_at': session.created_at.isoformat()
+            }
+            print(f"Data to insert: {data_to_insert}")
             
-            print(f"Saved story to Supabase for session {session_id}")
+            # Save to Supabase
+            response = supabase.table('story_submissions').insert([data_to_insert]).execute()
+            
+            print(f"Supabase response: {response}")
+            print(f"Successfully saved story to Supabase for session {session_id}")
             return True
             
         except Exception as e:
