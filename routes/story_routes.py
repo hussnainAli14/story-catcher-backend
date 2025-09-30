@@ -294,6 +294,7 @@ def generate_video_from_storyboard():
         data = request.get_json()
         storyboard = data.get('storyboard')
         email = data.get('email', '')  # Optional email
+        session_id = data.get('session_id', '')  # Session ID
         
         if not storyboard:
             return jsonify({
@@ -304,19 +305,20 @@ def generate_video_from_storyboard():
         # Generate video using VideoGen
         video_url = openai_service.generate_video_from_storyboard(storyboard)
         
-        # Save to Supabase if email is provided and video is ready
-        if email and video_url and not video_url.startswith('videogen://'):
-            # Video is ready, save to Supabase
+        # Save email immediately if provided
+        if email and session_id:
             try:
                 from services.story_service import StoryService
                 story_service = StoryService()
-                # Create a temporary session ID for saving
-                import uuid
-                temp_session_id = str(uuid.uuid4())
-                story_service.save_user_email(temp_session_id, email)
-                story_service.save_to_supabase(temp_session_id, video_url)
+                print(f"Saving email {email} for session {session_id}")
+                story_service.save_user_email(session_id, email)
+                
+                # If video is ready (not videogen://), save to Supabase immediately
+                if video_url and not video_url.startswith('videogen://'):
+                    print(f"Saving video {video_url} to Supabase for session {session_id}")
+                    story_service.save_to_supabase(session_id, video_url)
             except Exception as e:
-                print(f"Failed to save to Supabase: {e}")
+                print(f"Failed to save email/video to Supabase: {e}")
         
         return jsonify({
             'success': True,
@@ -329,6 +331,55 @@ def generate_video_from_storyboard():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@story_bp.route('/video/save-to-supabase', methods=['POST'])
+def save_video_to_supabase():
+    """
+    Save final video URL to Supabase
+    """
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        video_url = data.get('video_url')
+        
+        if not session_id or not video_url:
+            return jsonify({
+                'success': False,
+                'message': 'Session ID and video URL are required'
+            }), 400
+        
+        # Save to Supabase
+        try:
+            from services.story_service import StoryService
+            story_service = StoryService()
+            print(f"Saving final video {video_url} to Supabase for session {session_id}")
+            success = story_service.save_to_supabase(session_id, video_url)
+            
+            if success:
+                return jsonify({
+                    'success': True,
+                    'message': 'Video saved to Supabase successfully'
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'message': 'Failed to save video to Supabase'
+                }), 500
+                
+        except Exception as e:
+            print(f"Failed to save to Supabase: {e}")
+            return jsonify({
+                'success': False,
+                'error': str(e)
+            }), 500
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 
 @story_bp.route('/video/status/<api_file_id>', methods=['GET'])
 def get_video_status(api_file_id):
