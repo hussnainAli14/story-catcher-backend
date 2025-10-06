@@ -227,11 +227,14 @@ class VideoGenService:
         lines = storyboard.split('\n')
         scenes = []
         
-        # Extract title if present
+        # Extract title if present - with better cleaning
         title = None
         for line in lines:
             if '**Storyboard:' in line and '**' in line:
-                title = line.replace('**Storyboard:', '').replace('**', '').strip()
+                # Extract title with better cleaning
+                title_raw = line.replace('**Storyboard:', '').replace('**', '').strip()
+                # Clean the title by removing special characters and formatting
+                title = self._clean_title_for_voiceover(title_raw)
                 break
         
         # Parse scenes
@@ -279,8 +282,13 @@ class VideoGenService:
         script_parts = []
         
         # Opening - keep it concise and first person
-        if title:
-            script_parts.append(f"This is my story of {title.lower()}.")
+        if title and len(title.strip()) > 0:
+            # Ensure title is clean and safe for voiceover
+            clean_title = self._clean_title_for_voiceover(title)
+            if clean_title and len(clean_title.strip()) > 0:
+                script_parts.append(f"This is my story of {clean_title.lower()}.")
+            else:
+                script_parts.append("This is my personal story of transformation.")
         else:
             script_parts.append("This is my personal story of transformation.")
         
@@ -296,6 +304,13 @@ class VideoGenService:
         # Convert any remaining third person to first person
         final_script = self._convert_to_first_person("\n".join(script_parts))
         
+        # Final cleanup to ensure no problematic text remains
+        final_script = self._clean_text_for_voiceover(final_script)
+        
+        # Ensure we have a valid script
+        if not final_script or len(final_script.strip()) < 10:
+            return "This is my personal story of transformation and growth. A journey that demonstrates the power of resilience and the importance of learning from my experiences."
+        
         return final_script
     
     def _create_scene_narrative(self, scene: dict, scene_num: int, total_scenes: int) -> str:
@@ -310,43 +325,49 @@ class VideoGenService:
         else:
             narrative_parts.append("Then")
         
-        # Setting context - concise
+        # Setting context - concise and clean
         if scene.get('setting'):
-            setting_desc = scene['setting'].lower()
-            narrative_parts.append(f"{setting_desc}")
+            setting_desc = self._clean_text_for_voiceover(scene['setting'].lower())
+            if setting_desc:
+                narrative_parts.append(setting_desc)
         
-        # Visual description in first person - keep it short
+        # Visual description in first person - keep it short and clean
         if scene.get('visual'):
-            visual_desc = scene['visual']
-            # Make it first person and concise
-            if visual_desc.startswith('A '):
-                visual_desc = f"I see {visual_desc[2:].lower()}"
-            elif visual_desc.startswith('The '):
-                visual_desc = f"I see {visual_desc[4:].lower()}"
-            elif visual_desc.startswith('Close-up'):
-                visual_desc = f"I notice {visual_desc.lower()}"
-            else:
-                visual_desc = f"I see {visual_desc.lower()}"
-            
-            narrative_parts.append(f"where {visual_desc}")
+            visual_desc = self._clean_text_for_voiceover(scene['visual'])
+            if visual_desc:
+                # Make it first person and concise
+                if visual_desc.startswith('A '):
+                    visual_desc = f"I see {visual_desc[2:].lower()}"
+                elif visual_desc.startswith('The '):
+                    visual_desc = f"I see {visual_desc[4:].lower()}"
+                elif visual_desc.startswith('Close-up'):
+                    visual_desc = f"I notice {visual_desc.lower()}"
+                else:
+                    visual_desc = f"I see {visual_desc.lower()}"
+                
+                narrative_parts.append(f"where {visual_desc}")
         
-        # Action in first person - concise
+        # Action in first person - concise and clean
         if scene.get('action'):
-            action_desc = scene['action']
-            if action_desc.startswith('I '):
-                narrative_parts.append(f"Here, {action_desc.lower()}")
-            else:
-                narrative_parts.append(f"Here, I {action_desc.lower()}")
+            action_desc = self._clean_text_for_voiceover(scene['action'])
+            if action_desc:
+                if action_desc.startswith('I '):
+                    narrative_parts.append(f"Here, {action_desc.lower()}")
+                else:
+                    narrative_parts.append(f"Here, I {action_desc.lower()}")
         
-        # Mood - brief
+        # Mood - brief and clean
         if scene.get('mood'):
-            mood_desc = scene['mood']
-            narrative_parts.append(f"feeling {mood_desc.lower()}")
+            mood_desc = self._clean_text_for_voiceover(scene['mood'])
+            if mood_desc:
+                narrative_parts.append(f"feeling {mood_desc.lower()}")
         
+        # Join parts and ensure clean output
         scene_text = ". ".join(narrative_parts) + "."
         
-        # Ensure it's first person
-        return self._convert_to_first_person(scene_text)
+        # Clean the final text and ensure it's first person
+        final_text = self._convert_to_first_person(scene_text)
+        return self._clean_text_for_voiceover(final_text)
     
     def _convert_to_first_person(self, text: str) -> str:
         """Convert third person pronouns to first person"""
@@ -390,7 +411,91 @@ class VideoGenService:
         result = re.sub(r'\bme me\b', 'me', result)  # Fix "me me" -> "me"
         result = re.sub(r'\bmy my\b', 'my', result)  # Fix "my my" -> "my"
         
+        # Fix problematic patterns that might cause "TI" or similar issues
+        result = re.sub(r'\btmy\b', 'my', result)  # Fix "tmy" -> "my"
+        result = re.sub(r'\bti\b', '', result)  # Remove standalone "ti"
+        result = re.sub(r'\bt i\b', '', result)  # Remove "t i"
+        
         return result
+    
+    def _clean_title_for_voiceover(self, title: str) -> str:
+        """
+        Clean a title for safe use in voiceover by removing special characters and formatting
+        
+        Args:
+            title (str): The raw title from storyboard
+            
+        Returns:
+            str: Cleaned title safe for voiceover
+        """
+        if not title:
+            return ""
+        
+        # Remove common markdown formatting
+        cleaned = title.replace('*', '').replace('_', '').replace('`', '')
+        
+        # Remove quotes and brackets
+        cleaned = cleaned.replace('"', '').replace("'", '').replace('[', '').replace(']', '')
+        
+        # Remove extra whitespace and special characters
+        cleaned = re.sub(r'[^\w\s\-]', '', cleaned)
+        
+        # Clean up multiple spaces
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # Ensure it's not empty and has reasonable length
+        if len(cleaned) < 2 or len(cleaned) > 50:
+            return ""
+        
+        # Check for common problematic patterns
+        if cleaned.lower() in ['ti', 't', 'i', 'story', 'storyboard', 'scene', 'ti a story', 'tmy']:
+            return ""
+        
+        return cleaned
+    
+    def _clean_text_for_voiceover(self, text: str) -> str:
+        """
+        Clean text for safe use in voiceover by removing problematic characters and formatting
+        
+        Args:
+            text (str): The raw text to clean
+            
+        Returns:
+            str: Cleaned text safe for voiceover
+        """
+        if not text:
+            return ""
+        
+        # Remove common markdown formatting
+        cleaned = text.replace('*', '').replace('_', '').replace('`', '')
+        
+        # Remove quotes and brackets
+        cleaned = cleaned.replace('"', '').replace("'", '').replace('[', '').replace(']', '')
+        cleaned = cleaned.replace('(', '').replace(')', '').replace('{', '').replace('}', '')
+        
+        # Remove bullet points and special characters
+        cleaned = cleaned.replace('•', '').replace('-', ' ').replace('—', ' ').replace('–', ' ')
+        
+        # Remove extra whitespace and problematic characters
+        cleaned = re.sub(r'[^\w\s\.\,\!\?]', ' ', cleaned)
+        
+        # Clean up multiple spaces
+        cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+        
+        # Ensure it's not empty and has reasonable length
+        if len(cleaned) < 2:
+            return ""
+        
+        # Check for common problematic patterns that might cause "TI" or similar issues
+        problematic_patterns = ['ti', 't i', 't-i', 't.i', 't/i', 'tmy', 'ti a story', 'tmy is']
+        if cleaned.lower().strip() in problematic_patterns:
+            return ""
+        
+        # Additional check for patterns that might appear in the middle of text
+        if 'ti a story' in cleaned.lower() or 'tmy is' in cleaned.lower():
+            return ""
+        
+        return cleaned
     
     def _create_simple_narrative(self, storyboard: str) -> str:
         """Create a simple narrative from unstructured storyboard content"""
