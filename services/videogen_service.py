@@ -80,21 +80,55 @@ class VideoGenService:
     
     def _truncate_script_for_duration(self, script: str, max_words: int = 150) -> str:
         """
-        Truncate script to ensure video duration stays under 1 minute
+        Intelligently truncate script to ensure video duration stays under 1 minute
+        while preserving the complete story arc
         
         Args:
             script (str): The original script
             max_words (int): Maximum number of words (default: 150 for ~60 seconds)
             
         Returns:
-            str: Truncated script
+            str: Truncated script that maintains story completeness
         """
         words = script.split()
         
         if len(words) <= max_words:
             return script
         
-        # Truncate to max_words and ensure we end at a sentence
+        # Split script into sentences to preserve story structure
+        sentences = script.split('. ')
+        
+        # Try to include complete sentences up to word limit
+        included_sentences = []
+        word_count = 0
+        
+        for sentence in sentences:
+            sentence_words = sentence.split()
+            # Add 1 for the period that was removed in split
+            sentence_word_count = len(sentence_words) + 1
+            
+            if word_count + sentence_word_count <= max_words:
+                included_sentences.append(sentence)
+                word_count += sentence_word_count
+            else:
+                # If adding this sentence would exceed limit, check if we can fit a partial
+                remaining_words = max_words - word_count
+                if remaining_words >= 10:  # Only if we have enough words for meaningful content
+                    # Try to include a meaningful portion of the sentence
+                    partial_sentence = ' '.join(sentence_words[:remaining_words])
+                    if partial_sentence.strip():
+                        included_sentences.append(partial_sentence)
+                break
+        
+        # Join sentences and ensure proper ending
+        if included_sentences:
+            truncated_text = '. '.join(included_sentences)
+            # Ensure it ends with a period
+            if not truncated_text.endswith('.'):
+                truncated_text += '.'
+            return truncated_text
+        
+        # Fallback: simple word truncation
         truncated_words = words[:max_words]
         truncated_text = " ".join(truncated_words)
         
@@ -221,7 +255,7 @@ class VideoGenService:
             storyboard (str): The storyboard text
             
         Returns:
-            str: A narrative script suitable for video voiceover
+            str: A narrative script suitable for video voiceover (optimized for 1-minute duration)
         """
         # Extract the main narrative from the storyboard
         lines = storyboard.split('\n')
@@ -278,40 +312,8 @@ class VideoGenService:
         if not scenes:
             return self._create_simple_narrative(storyboard)
         
-        # Create a flowing narrative script
-        script_parts = []
-        
-        # Opening - keep it concise and first person
-        if title and len(title.strip()) > 0:
-            # Ensure title is clean and safe for voiceover
-            clean_title = self._clean_title_for_voiceover(title)
-            if clean_title and len(clean_title.strip()) > 0:
-                script_parts.append(f"This is my story of {clean_title.lower()}.")
-            else:
-                script_parts.append("This is my personal story of transformation.")
-        else:
-            script_parts.append("This is my personal story of transformation.")
-        
-        # Scene narratives - limit to 3-4 scenes for shorter video
-        max_scenes = min(len(scenes), 4)  # Limit to 4 scenes max
-        for i, scene in enumerate(scenes[:max_scenes]):
-            scene_narrative = self._create_scene_narrative(scene, i + 1, max_scenes)
-            script_parts.append(scene_narrative)
-        
-        # Closing - keep it brief and first person
-        script_parts.append("This experience taught me that challenges can become opportunities for growth.")
-        
-        # Convert any remaining third person to first person
-        final_script = self._convert_to_first_person("\n".join(script_parts))
-        
-        # Final cleanup to ensure no problematic text remains
-        final_script = self._clean_text_for_voiceover(final_script)
-        
-        # Ensure we have a valid script
-        if not final_script or len(final_script.strip()) < 10:
-            return "This is my personal story of transformation and growth. A journey that demonstrates the power of resilience and the importance of learning from my experiences."
-        
-        return final_script
+        # Create a complete narrative that fits within 1-minute constraint
+        return self._create_complete_narrative(scenes, title)
     
     def _create_scene_narrative(self, scene: dict, scene_num: int, total_scenes: int) -> str:
         """Create a concise first-person narrative description for a single scene"""
@@ -369,6 +371,163 @@ class VideoGenService:
         final_text = self._convert_to_first_person(scene_text)
         return self._clean_text_for_voiceover(final_text)
     
+    def _create_complete_narrative(self, scenes: list, title: str) -> str:
+        """
+        Create a complete narrative that tells the full story within 1-minute constraint
+        
+        Args:
+            scenes (list): List of scene dictionaries
+            title (str): Story title (cleaned)
+            
+        Returns:
+            str: Complete narrative script optimized for 1-minute duration
+        """
+        # Target word count for 1-minute video (approximately 150-180 words)
+        target_words = 160
+        
+        # Create different narrative strategies based on number of scenes
+        if len(scenes) <= 3:
+            # Few scenes - can include more detail per scene
+            return self._create_detailed_narrative(scenes, title, target_words)
+        elif len(scenes) <= 6:
+            # Medium number of scenes - balanced approach
+            return self._create_balanced_narrative(scenes, title, target_words)
+        else:
+            # Many scenes - focus on key story beats
+            return self._create_summary_narrative(scenes, title, target_words)
+    
+    def _create_detailed_narrative(self, scenes: list, title: str, target_words: int) -> str:
+        """Create detailed narrative for stories with few scenes"""
+        script_parts = []
+        
+        # Opening
+        if title and len(title.strip()) > 0:
+            script_parts.append(f"This is my story of {title.lower()}.")
+        else:
+            script_parts.append("This is my personal story of transformation.")
+        
+        # Include all scenes with more detail
+        for i, scene in enumerate(scenes):
+            scene_narrative = self._create_scene_narrative(scene, i + 1, len(scenes))
+            script_parts.append(scene_narrative)
+        
+        # Closing
+        script_parts.append("This experience taught me that challenges can become opportunities for growth.")
+        
+        # Join and clean
+        final_script = self._convert_to_first_person("\n".join(script_parts))
+        # Don't over-clean the final script - just basic cleanup
+        final_script = self._basic_clean_text(final_script)
+        
+        # Check word count and adjust if needed
+        word_count = len(final_script.split())
+        if word_count > target_words:
+            return self._truncate_script_for_duration(final_script, target_words)
+        
+        return final_script
+    
+    def _create_balanced_narrative(self, scenes: list, title: str, target_words: int) -> str:
+        """Create balanced narrative for stories with medium number of scenes"""
+        script_parts = []
+        
+        # Opening
+        if title and len(title.strip()) > 0:
+            script_parts.append(f"This is my story of {title.lower()}.")
+        else:
+            script_parts.append("This is my personal story of transformation.")
+        
+        # Select key scenes to tell complete story
+        key_scenes = self._select_key_scenes(scenes)
+        
+        for i, scene in enumerate(key_scenes):
+            scene_narrative = self._create_scene_narrative(scene, i + 1, len(key_scenes))
+            script_parts.append(scene_narrative)
+        
+        # Closing
+        script_parts.append("This experience taught me that challenges can become opportunities for growth.")
+        
+        # Join and clean
+        final_script = self._convert_to_first_person("\n".join(script_parts))
+        # Don't over-clean the final script - just basic cleanup
+        final_script = self._basic_clean_text(final_script)
+        
+        # Check word count and adjust if needed
+        word_count = len(final_script.split())
+        if word_count > target_words:
+            return self._truncate_script_for_duration(final_script, target_words)
+        
+        return final_script
+    
+    def _create_summary_narrative(self, scenes: list, title: str, target_words: int) -> str:
+        """Create summary narrative for stories with many scenes"""
+        script_parts = []
+        
+        # Opening
+        if title and len(title.strip()) > 0:
+            script_parts.append(f"This is my story of {title.lower()}.")
+        else:
+            script_parts.append("This is my personal story of transformation.")
+        
+        # Create a summary that covers the complete story arc
+        beginning_scenes = scenes[:2] if len(scenes) >= 2 else scenes[:1]
+        middle_scenes = scenes[len(scenes)//2-1:len(scenes)//2+1] if len(scenes) >= 4 else scenes[1:2]
+        ending_scenes = scenes[-2:] if len(scenes) >= 2 else scenes[-1:]
+        
+        # Combine key scenes
+        key_scenes = beginning_scenes + middle_scenes + ending_scenes
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_scenes = []
+        for scene in key_scenes:
+            scene_id = scene.get('number', '')
+            if scene_id not in seen:
+                seen.add(scene_id)
+                unique_scenes.append(scene)
+        
+        # Limit to 4 scenes max for summary
+        unique_scenes = unique_scenes[:4]
+        
+        for i, scene in enumerate(unique_scenes):
+            scene_narrative = self._create_scene_narrative(scene, i + 1, len(unique_scenes))
+            script_parts.append(scene_narrative)
+        
+        # Closing
+        script_parts.append("This experience taught me that challenges can become opportunities for growth.")
+        
+        # Join and clean
+        final_script = self._convert_to_first_person("\n".join(script_parts))
+        # Don't over-clean the final script - just basic cleanup
+        final_script = self._basic_clean_text(final_script)
+        
+        # Check word count and adjust if needed
+        word_count = len(final_script.split())
+        if word_count > target_words:
+            return self._truncate_script_for_duration(final_script, target_words)
+        
+        return final_script
+    
+    def _select_key_scenes(self, scenes: list) -> list:
+        """Select key scenes that tell the complete story"""
+        if len(scenes) <= 4:
+            return scenes
+        
+        # Always include first and last scenes
+        key_scenes = [scenes[0]]
+        
+        # Add middle scenes
+        if len(scenes) > 2:
+            middle_index = len(scenes) // 2
+            key_scenes.append(scenes[middle_index])
+        
+        # Add second-to-last scene if it exists
+        if len(scenes) > 2:
+            key_scenes.append(scenes[-2])
+        
+        # Always include last scene
+        key_scenes.append(scenes[-1])
+        
+        return key_scenes
+    
     def _convert_to_first_person(self, text: str) -> str:
         """Convert third person pronouns to first person"""
         # Common third person to first person conversions
@@ -415,6 +574,14 @@ class VideoGenService:
         result = re.sub(r'\btmy\b', 'my', result)  # Fix "tmy" -> "my"
         result = re.sub(r'\bti\b', '', result)  # Remove standalone "ti"
         result = re.sub(r'\bt i\b', '', result)  # Remove "t i"
+        
+        # Fix "Tmy" -> "This" (common conversion error)
+        result = re.sub(r'\bTmy\b', 'This', result)
+        result = re.sub(r'\btmy\b', 'this', result)
+        
+        # Fix "tI" -> "the" (another common conversion error)
+        result = re.sub(r'\btI\b', 'the', result)
+        result = re.sub(r'\bti\b', 'the', result)
         
         return result
     
@@ -493,6 +660,32 @@ class VideoGenService:
         
         # Additional check for patterns that might appear in the middle of text
         if 'ti a story' in cleaned.lower() or 'tmy is' in cleaned.lower():
+            return ""
+        
+        # Don't filter out legitimate words that contain these patterns
+        if cleaned.lower() in ['this', 'that', 'these', 'those', 'their', 'there']:
+            return cleaned
+        
+        return cleaned
+    
+    def _basic_clean_text(self, text: str) -> str:
+        """
+        Basic text cleaning for final scripts - less aggressive than _clean_text_for_voiceover
+        
+        Args:
+            text (str): The text to clean
+            
+        Returns:
+            str: Basic cleaned text
+        """
+        if not text:
+            return ""
+        
+        # Remove extra whitespace
+        cleaned = re.sub(r'\s+', ' ', text).strip()
+        
+        # Ensure it's not empty
+        if len(cleaned) < 2:
             return ""
         
         return cleaned
