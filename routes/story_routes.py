@@ -29,7 +29,7 @@ def start_story_session():
             return jsonify({
                 'success': True,
                 'session_id': session.session_id,
-                'message': 'That\'s wonderful — thank you for being open and ready to share. 🌟\n\nThis process involves just four reflective questions, and I\'ll guide you through each one gently. Take your time with each response — depth and emotion are welcome here.\n\nLet\'s begin with the first question:',
+                'message': 'Thank you for your willingness to share your story. I appreciate your openness.\n\nWe’ll go through four thoughtful questions together, one at a time. There’s no rush—feel free to answer in as much detail as you like.\n\nHere is the first question:',
                 'question': first_question,
                 'question_number': 1,
                 'total_questions': 4,
