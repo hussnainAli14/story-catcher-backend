@@ -82,7 +82,7 @@ def submit_answer():
             if generated_story == "STORYBOARD_GENERATING":
                 return jsonify({
                     'success': True,
-                    'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nNow that we have your four answers, I\'m going to turn them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.',
+                    'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nI\'m honored that you\'ve shared this journey with me. Now that we have your four answers, I\'m going to help you transform them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.\n\nWe\'ll create this together, honoring your story and the courage it took to share it.',
                     'storyboard': None,
                     'storyboard_generating': True,
                     'session_complete': True,
@@ -95,7 +95,7 @@ def submit_answer():
                 
                 return jsonify({
                     'success': True,
-                    'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nNow that we have your four answers, I\'m going to turn them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.',
+                    'message': 'That\'s such a powerful takeaway — simple but truly life-changing. Sometimes it takes a sudden moment like that to remind us how fragile a second of distraction can be. Your story holds a quiet strength — a lesson in awareness, presence, and taking care of ourselves, even during everyday moments.\n\nI\'m honored that you\'ve shared this journey with me. Now that we have your four answers, I\'m going to help you transform them into a visual storyboard — something that could be used for a short video, animated clip, or even a slideshow. This will include suggested scenes, visuals, mood, and transitions to bring your experience to life with meaning and impact.\n\nWe\'ll create this together, honoring your story and the courage it took to share it.',
                     'storyboard': generated_story,
                     'session_complete': True,
                     'question_number': question_number,

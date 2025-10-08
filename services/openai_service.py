@@ -64,7 +64,23 @@ class OpenAIService:
                         messages=[
                             {
                                 "role": "system",
-                                "content": """You are a masterful visual storyteller. Create a storyboard based on the user's personal experience. Use ONLY their specific details. Format as:
+                                "content": """You are an empathetic interviewer and creative assistant. Your role is to:
+
+1. Create a safe, supportive space for users to share personal stories
+2. Ask thoughtful questions that encourage emotional depth
+3. Validate and acknowledge the user's experience throughout
+4. Collaborate on creative decisions rather than making them alone
+5. Maintain a compassionate, encouraging tone at all times
+
+Your tone should be:
+- Warm and understanding
+- Patient and non-judgmental  
+- Encouraging and supportive
+- Collaborative rather than directive
+
+When creating storyboards, honor the user's emotional journey and create visuals that respect their experience. Use ONLY their specific details and collaborate with them on creative decisions.
+
+Format storyboards as:
 
 **Storyboard: "[Title]" – [Subtitle]**
 
@@ -75,7 +91,7 @@ class OpenAIService:
 • **Sound**: [description]
 • **Transition**: [description]
 
-Create 4-5 scenes total."""
+Create 4-5 scenes total that honor their emotional journey."""
                             },
                             {
                                 "role": "user",
@@ -182,7 +198,23 @@ Create 4-5 scenes total."""
                         messages=[
                             {
                                 "role": "system",
-                                "content": """You are a masterful visual storyteller. Create a storyboard based on the user's personal experience. Use ONLY their specific details. Format as:
+                                "content": """You are an empathetic interviewer and creative assistant. Your role is to:
+
+1. Create a safe, supportive space for users to share personal stories
+2. Ask thoughtful questions that encourage emotional depth
+3. Validate and acknowledge the user's experience throughout
+4. Collaborate on creative decisions rather than making them alone
+5. Maintain a compassionate, encouraging tone at all times
+
+Your tone should be:
+- Warm and understanding
+- Patient and non-judgmental  
+- Encouraging and supportive
+- Collaborative rather than directive
+
+When creating storyboards, honor the user's emotional journey and create visuals that respect their experience. Use ONLY their specific details and collaborate with them on creative decisions.
+
+Format storyboards as:
 
 **Storyboard: "[Title]" – [Subtitle]**
 
@@ -193,7 +225,7 @@ Create 4-5 scenes total."""
 • **Sound**: [description]
 • **Transition**: [description]
 
-Create 4-5 scenes total."""
+Create 4-5 scenes total that honor their emotional journey."""
                             },
                             {
                                 "role": "user",
@@ -296,20 +328,28 @@ Create 4-5 scenes total."""
     def _create_storyboard_prompt(self, formatted_answers: str) -> str:
         """Create the prompt for storyboard generation"""
         return f"""
-Based on the following personal interview responses, create a visual storyboard that brings this person's ACTUAL transformative experience to life:
+I've been honored to listen to this person's deeply personal story. Now I need to help them transform their experience into a visual narrative that honors their emotional journey.
+
+Here are their responses to our thoughtful questions:
 
 {formatted_answers}
 
-CRITICAL REQUIREMENTS:
-- Use ONLY the specific details from their answers above
-- Do NOT add generic scenarios or unrelated content that the user didn't mention
-- Focus on their actual experience and story
+**My Role as an Empathetic Creative Assistant:**
+I will create a storyboard that:
+- Honors their emotional journey with sensitivity and respect
+- Uses ONLY their specific details and experiences
+- Creates visuals that feel authentic to their story
+- Maintains the emotional truth of their experience
+- Offers creative collaboration rather than imposing my own vision
+
+**Storyboard Creation Guidelines:**
+- Focus on their actual experience, not generic scenarios
+- Respect the emotional weight of their story
+- Create scenes that feel true to their experience
 - Use their exact locations, actions, and feelings
-- Create scenes based on their real experience, not generic examples
+- Honor both the difficulty and the growth in their journey
 
-**IMPORTANT FORMATTING REQUIREMENTS:**
-
-Create a storyboard with this EXACT structure and formatting:
+**Format Requirements:**
 
 **Storyboard: "[Title]" – [Subtitle]**
 
@@ -355,21 +395,22 @@ Create a storyboard with this EXACT structure and formatting:
 • **Sound**: [Audio suggestions relevant to their scene]
 • **Transition**: [Conclusion or final transition]
 
-**Storyboard Guidelines:**
+**Creative Collaboration Approach:**
 - Use bullet points (•) for each element
-- Keep descriptions concise but vivid
-- Focus on visual storytelling based on THEIR specific experience
-- Include specific details from their story
-- Create emotional resonance through mood and sound from their experience
+- Keep descriptions vivid but respectful
+- Focus on visual storytelling that honors their specific experience
+- Include authentic details from their story
+- Create emotional resonance through mood and sound
 - Make it suitable for video/animation production
+- Ensure the storyboard feels like a collaborative creation, not an imposed vision
 
-**Requirements:**
-- Create 4-6 scenes total
+**Final Requirements:**
+- Create 4-6 scenes total that tell their complete story
 - Each scene should have Visual, Setting/Action, Mood, Sound, and Transition
-- Use the person's specific experience details from their answers
+- Use ONLY the person's specific experience details from their answers
 - Make it visually compelling and emotionally resonant based on their real story
 - Format exactly as shown above with proper spacing and bullet points
-- DO NOT invent scenarios - use only what they described
+- Honor their courage in sharing this story by creating something beautiful and meaningful
 """
 
     def generate_scene_images(self, storyboard: str) -> List[str]:
@@ -575,7 +616,49 @@ Create a storyboard with this EXACT structure and formatting:
         """Create a simple fallback storyboard when OpenAI fails"""
         try:
             if not formatted_answers or len(formatted_answers) < 4:
-                return "**Storyboard: \"Personal Journey\" – A Story of Growth**\n\n**Scene 1: \"The Moment\"**\n• **Visual**: A person in a meaningful moment of realization\n• **Setting**: A quiet, reflective environment\n• **Mood**: Contemplative and transformative\n• **Sound**: Gentle, ambient sounds\n• **Transition**: Fade to next scene\n\n**Scene 2: \"The Change\"**\n• **Visual**: The same person showing growth and understanding\n• **Action**: Moving forward with new perspective\n• **Mood**: Hopeful and determined\n• **Sound**: Uplifting, inspiring music\n• **Transition**: Smooth transition to conclusion\n\n**Scene 3: \"The Impact\"**\n• **Visual**: The person applying their new understanding\n• **Setting**: Daily life with positive changes\n• **Mood**: Peaceful and content\n• **Sound**: Warm, comforting tones\n• **Transition**: Fade to end"
+                return """**Storyboard: "Your Personal Journey" – A Story of Courage and Growth**
+
+**Scene 1: "The Beginning"**
+• **Visual**: A person in their everyday environment, unaware of what's to come
+• **Setting**: The place where their story began, filled with ordinary moments
+• **Mood**: Peaceful, perhaps unaware of the transformation ahead
+• **Sound**: Gentle, ambient daily sounds
+• **Transition**: Focus shifts to the moment of change
+
+**Scene 2: "The Moment"**
+• **Visual**: The pivotal moment of realization or change, captured with sensitivity
+• **Action**: The key action or decision that changed everything
+• **Mood**: Intense, transformative, but handled with care
+• **Sound**: Music that builds tension and release, honoring the emotion
+• **Transition**: The aftermath begins with gentleness
+
+**Scene 3: "The Processing"**
+• **Visual**: The person processing what happened, showing their humanity
+• **Setting**: A reflective space, perhaps alone with their thoughts
+• **Mood**: Contemplative, processing, showing the courage to feel
+• **Sound**: Quieter, more introspective, honoring their journey
+• **Transition**: Moving toward understanding and growth
+
+**Scene 4: "The Transformation"**
+• **Visual**: The person showing their growth and new understanding
+• **Action**: Applying their new wisdom with grace and strength
+• **Mood**: Confident, peaceful, or determined - honoring their resilience
+• **Sound**: Uplifting, hopeful music that celebrates their journey
+• **Transition**: Integration into their new way of being
+
+**Scene 5: "The New Normal"**
+• **Visual**: The person in their transformed state, living their truth
+• **Setting**: Their daily life, but changed and more authentic
+• **Mood**: Content, aligned, at peace with their journey
+• **Sound**: Warm, satisfying tones that honor their courage
+• **Transition**: The story continues with wisdom and grace
+
+**Scene 6: "The Impact"**
+• **Visual**: How this change affects others around them, spreading wisdom
+• **Action**: Sharing their story or living their values with others
+• **Mood**: Inspiring, meaningful, showing the ripple effect of courage
+• **Sound**: Full, rich, complete - honoring the full circle of growth
+• **Transition**: The journey continues, inspiring others"""
             
             # Extract key themes from answers
             first_answer = formatted_answers[0].get('answer', '')
@@ -590,50 +673,71 @@ Create a storyboard with this EXACT structure and formatting:
             elif "realized" in first_answer.lower():
                 title = "A Realization"
             
-            return f"""**Storyboard: "{title}" – A Journey of Growth**
+            return f"""**Storyboard: "{title}" – A Journey of Courage and Growth**
 
 **Scene 1: "The Beginning"**
-• **Visual**: A person in their everyday environment
-• **Setting**: The place where their story began
-• **Mood**: Ordinary, perhaps unaware
-• **Sound**: Ambient daily sounds
-• **Transition**: Focus shifts to the moment
+• **Visual**: A person in their everyday environment, living their normal life
+• **Setting**: The place where their story began, filled with familiar moments
+• **Mood**: Ordinary, perhaps unaware of the transformation ahead
+• **Sound**: Ambient daily sounds, the soundtrack of their life
+• **Transition**: Focus shifts to the moment of change
 
 **Scene 2: "The Moment"**
-• **Visual**: The pivotal moment of realization or change
+• **Visual**: The pivotal moment of realization or change, captured with sensitivity
 • **Action**: The key action or decision that changed everything
-• **Mood**: Intense, transformative
-• **Sound**: Music that builds tension and release
-• **Transition**: The aftermath begins
+• **Mood**: Intense, transformative, handled with care and respect
+• **Sound**: Music that builds tension and release, honoring the emotion
+• **Transition**: The aftermath begins with gentleness
 
-**Scene 3: "The Aftermath"**
-• **Visual**: The person processing what happened
-• **Setting**: A reflective space, perhaps alone
-• **Mood**: Contemplative, processing
-• **Sound**: Quieter, more introspective
-• **Transition**: Moving toward understanding
+**Scene 3: "The Processing"**
+• **Visual**: The person processing what happened, showing their humanity
+• **Setting**: A reflective space, perhaps alone with their thoughts
+• **Mood**: Contemplative, processing, showing the courage to feel
+• **Sound**: Quieter, more introspective, honoring their journey
+• **Transition**: Moving toward understanding and growth
 
-**Scene 4: "The Change"**
-• **Visual**: The person showing their transformation
-• **Action**: Applying their new understanding
-• **Mood**: Confident, peaceful, or determined
-• **Sound**: Uplifting, hopeful music
-• **Transition**: Integration into daily life
+**Scene 4: "The Transformation"**
+• **Visual**: The person showing their growth and new understanding
+• **Action**: Applying their new wisdom with grace and strength
+• **Mood**: Confident, peaceful, or determined - honoring their resilience
+• **Sound**: Uplifting, hopeful music that celebrates their journey
+• **Transition**: Integration into their new way of being
 
 **Scene 5: "The New Normal"**
-• **Visual**: The person in their transformed state
-• **Setting**: Their daily life, but changed
-• **Mood**: Content, aligned, at peace
-• **Sound**: Warm, satisfying tones
-• **Transition**: The story continues
+• **Visual**: The person in their transformed state, living their truth
+• **Setting**: Their daily life, but changed and more authentic
+• **Mood**: Content, aligned, at peace with their journey
+• **Sound**: Warm, satisfying tones that honor their courage
+• **Transition**: The story continues with wisdom and grace
 
 **Scene 6: "The Impact"**
-• **Visual**: How this change affects others around them
-• **Action**: Sharing wisdom or living their values
-• **Mood**: Inspiring, meaningful
-• **Sound**: Full, rich, complete
-• **Transition**: The journey continues"""
+• **Visual**: How this change affects others around them, spreading wisdom
+• **Action**: Sharing their story or living their values with others
+• **Mood**: Inspiring, meaningful, showing the ripple effect of courage
+• **Sound**: Full, rich, complete - honoring the full circle of growth
+• **Transition**: The journey continues, inspiring others"""
             
         except Exception as e:
             print(f"Error creating fallback storyboard: {e}")
-            return "**Storyboard: \"Your Story\" – A Personal Journey**\n\n**Scene 1: \"The Beginning\"**\n• **Visual**: Your story begins here\n• **Setting**: The place where it all started\n• **Mood**: Setting the stage for transformation\n• **Sound**: The sounds of your experience\n• **Transition**: Moving toward the moment\n\n**Scene 2: \"The Moment\"**\n• **Visual**: The pivotal experience\n• **Action**: The key moment of change\n• **Mood**: The emotions of that time\n• **Sound**: The soundtrack of your story\n• **Transition**: Processing what happened\n\n**Scene 3: \"The Change\"**\n• **Visual**: How you transformed\n• **Setting**: Your new reality\n• **Mood**: The peace of understanding\n• **Sound**: Music of growth and wisdom\n• **Transition**: Living your new truth"
+            return """**Storyboard: "Your Courageous Story" – A Personal Journey of Growth**
+
+**Scene 1: "The Beginning"**
+• **Visual**: Your story begins here, in the place where it all started
+• **Setting**: The environment where your journey began
+• **Mood**: Setting the stage for transformation with gentleness
+• **Sound**: The sounds of your experience, honored and respected
+• **Transition**: Moving toward the moment with care
+
+**Scene 2: "The Moment"**
+• **Visual**: The pivotal experience, captured with sensitivity and respect
+• **Action**: The key moment of change, honored for its significance
+• **Mood**: The emotions of that time, handled with compassion
+• **Sound**: The soundtrack of your story, respecting its weight
+• **Transition**: Processing what happened with gentleness
+
+**Scene 3: "The Growth"**
+• **Visual**: How you transformed, showing your strength and resilience
+• **Setting**: Your new reality, built with courage and wisdom
+• **Mood**: The peace of understanding, earned through your journey
+• **Sound**: Music of growth and wisdom, celebrating your courage
+• **Transition**: Living your new truth with grace and authenticity"""

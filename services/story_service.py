@@ -84,47 +84,47 @@ class StoryService:
         # Question 2: What led up to that moment?
         if question_number == 2:
             if any(word in first_answer for word in ['fell', 'fall', 'accident', 'crash', 'collision']):
-                return "What led up to that moment? Were you rushing somewhere, feeling distracted, or was it just an ordinary day that suddenly changed?"
+                return "I can only imagine how frightening that must have been. Before we continue, I want you to know this is a safe space to share whatever feels right to you. What led up to that moment? Were you rushing somewhere, feeling distracted, or was it just an ordinary day that suddenly changed? Take your time with this."
             elif any(word in first_answer for word in ['lost', 'death', 'died', 'passed away']):
-                return "What led up to that moment? What was happening in your life before this loss occurred?"
+                return "Thank you for trusting me with something so deeply personal. Loss can be one of the most profound experiences we face. What led up to that moment? What was happening in your life before this loss occurred? I'm here to listen, and there's no rush."
             elif any(word in first_answer for word in ['job', 'work', 'career', 'fired', 'quit', 'resigned']):
-                return "What led up to that moment? What was happening at work or in your career before this change?"
+                return "Career changes can be both exciting and terrifying. I can hear how significant this moment was for you. What led up to that moment? What was happening at work or in your career before this change? How are you feeling as you share this?"
             elif any(word in first_answer for word in ['relationship', 'breakup', 'divorce', 'marriage', 'love']):
-                return "What led up to that moment? What was happening in your relationship before this change?"
+                return "Relationships touch the deepest parts of who we are. Thank you for sharing something so meaningful. What led up to that moment? What was happening in your relationship before this change? I'm here to listen with compassion."
             elif any(word in first_answer for word in ['move', 'moved', 'relocated', 'travel', 'journey']):
-                return "What led up to that moment? What circumstances led to this change in your life?"
+                return "Life changes like moving can be both exciting and overwhelming. What led up to that moment? What circumstances led to this change in your life? Take your time to share whatever feels important to you."
             else:
-                return "What led up to that moment? What was happening in your life before this experience occurred?"
+                return "Thank you for sharing that with me. I can hear how significant this moment was for you. What led up to that moment? What was happening in your life before this experience occurred? There's no right or wrong way to answer this."
         
         # Question 3: What happened right after?
         elif question_number == 3:
             if any(word in first_answer for word in ['fell', 'fall', 'accident', 'crash', 'collision']):
-                return "What happened right after you fell? How did you feel — physically and emotionally — in those first moments? Did someone help you?"
+                return "That must have been such a disorienting and jarring few moments. How are you feeling as you share this? What happened right after you fell? How did you feel — physically and emotionally — in those first moments? Did someone help you? It's okay if this brings up difficult emotions."
             elif any(word in first_answer for word in ['lost', 'death', 'died', 'passed away']):
-                return "What happened right after you learned about this loss? How did you feel in those first moments? Who was there with you?"
+                return "I can only imagine how overwhelming those first moments must have been. How are you doing as you share this? What happened right after you learned about this loss? How did you feel in those first moments? Who was there with you? Take breaks whenever you need to."
             elif any(word in first_answer for word in ['job', 'work', 'career', 'fired', 'quit', 'resigned']):
-                return "What happened right after this career change? How did you feel in those first moments? What did you do next?"
+                return "Career changes can feel like your whole world is shifting. How are you feeling about sharing this? What happened right after this career change? How did you feel in those first moments? What did you do next? I'm here to listen without judgment."
             elif any(word in first_answer for word in ['relationship', 'breakup', 'divorce', 'marriage', 'love']):
-                return "What happened right after this relationship change? How did you feel in those first moments? What did you do next?"
+                return "Relationship changes can feel like the ground is moving beneath you. How are you feeling as you share this? What happened right after this relationship change? How did you feel in those first moments? What did you do next? Your feelings are completely valid."
             elif any(word in first_answer for word in ['move', 'moved', 'relocated', 'travel', 'journey']):
-                return "What happened right after this change? How did you feel in those first moments? What was it like to be in this new situation?"
+                return "Big life changes can be both exciting and overwhelming. How are you feeling about sharing this? What happened right after this change? How did you feel in those first moments? What was it like to be in this new situation? Take your time."
             else:
-                return "What happened right after this experience? How did you feel in those first moments? What was going through your mind?"
+                return "Thank you for continuing to share your story with me. How are you feeling as we explore this? What happened right after this experience? How did you feel in those first moments? What was going through your mind? There's no rush, and we can pause anytime."
         
         # Question 4: How did this change you?
         elif question_number == 4:
             if any(word in first_answer for word in ['fell', 'fall', 'accident', 'crash', 'collision']):
-                return "How did this moment change you? Did it shift how you think, act, or feel in your daily life? Maybe it made you more careful or more aware of your surroundings?"
+                return "I can hear the strength it took to get through that experience. How are you feeling as we near the end of our conversation? How did this moment change you? Did it shift how you think, act, or feel in your daily life? Maybe it made you more careful or more aware of your surroundings? Your growth is beautiful to witness."
             elif any(word in first_answer for word in ['lost', 'death', 'died', 'passed away']):
-                return "How did this loss change you? Did it shift how you think about life, relationships, or what matters most to you?"
+                return "Thank you for trusting me with something so deeply personal. How are you feeling as we explore this? How did this loss change you? Did it shift how you think about life, relationships, or what matters most to you? Your courage in sharing this is inspiring."
             elif any(word in first_answer for word in ['job', 'work', 'career', 'fired', 'quit', 'resigned']):
-                return "How did this career change transform you? Did it shift how you think about work, success, or your life priorities?"
+                return "Career changes can be profound teachers. How are you feeling about sharing this journey? How did this career change transform you? Did it shift how you think about work, success, or your life priorities? Your resilience is evident."
             elif any(word in first_answer for word in ['relationship', 'breakup', 'divorce', 'marriage', 'love']):
-                return "How did this relationship change transform you? Did it shift how you think about love, connection, or what you want in relationships?"
+                return "Relationship changes can teach us so much about ourselves. How are you feeling as we explore this? How did this relationship change transform you? Did it shift how you think about love, connection, or what you want in relationships? Your openness is beautiful."
             elif any(word in first_answer for word in ['move', 'moved', 'relocated', 'travel', 'journey']):
-                return "How did this change transform you? Did it shift how you think about home, belonging, or what you value in life?"
+                return "Life changes like moving can be incredible catalysts for growth. How are you feeling about sharing this? How did this change transform you? Did it shift how you think about home, belonging, or what you value in life? Your adaptability is inspiring."
             else:
-                return "How did this experience change you? Did it shift how you think, act, or feel in your daily life? What stayed with you after this moment?"
+                return "Thank you for sharing your story with such openness and courage. How are you feeling as we explore this final question? How did this experience change you? Did it shift how you think, act, or feel in your daily life? What stayed with you after this moment? Your willingness to reflect deeply is beautiful."
         
         return ""
     
@@ -134,33 +134,33 @@ class StoryService:
         
         if question_number == 1:
             if any(word in answer_lower for word in ['fell', 'fall', 'accident', 'crash', 'collision']):
-                return "Thank you for sharing that — falling down the stairs can be incredibly frightening, both physically and emotionally. I'm glad you're here to talk about it. You're safe now, and we're going to take this story gently, step by step."
+                return "Thank you for sharing that with such courage. Falling down the stairs can be incredibly frightening, both physically and emotionally. I'm honored that you're willing to talk about it with me. You're safe now, and we're going to take this story gently, step by step. How are you feeling as you share this?"
             elif any(word in answer_lower for word in ['lost', 'death', 'died', 'passed away']):
-                return "Thank you for sharing that with me. Loss can be one of the most profound experiences we face. I'm honored that you're willing to talk about this moment with me."
+                return "Thank you for trusting me with something so deeply personal. Loss can be one of the most profound experiences we face, and I'm honored that you're willing to talk about this moment with me. Your courage in sharing this is beautiful. How are you feeling as you share this?"
             elif any(word in answer_lower for word in ['job', 'work', 'career', 'fired', 'quit', 'resigned']):
-                return "Thank you for sharing that experience. Career changes can be both exciting and terrifying. I can hear how significant this moment was for you."
+                return "Thank you for sharing that experience with such openness. Career changes can be both exciting and terrifying, and I can hear how significant this moment was for you. Your willingness to reflect on this is inspiring. How are you feeling about sharing this?"
             elif any(word in answer_lower for word in ['relationship', 'breakup', 'divorce', 'marriage', 'love']):
-                return "Thank you for sharing that. Relationships touch the deepest parts of who we are. I can hear how meaningful this moment was for you."
+                return "Thank you for sharing that with such vulnerability. Relationships touch the deepest parts of who we are, and I can hear how meaningful this moment was for you. Your openness is beautiful. How are you feeling as you share this?"
             else:
-                return "Thank you for sharing that experience with me. I can hear how significant this moment was for you."
+                return "Thank you for sharing that experience with such courage. I can hear how significant this moment was for you, and I'm honored that you're willing to explore it with me. How are you feeling about sharing this?"
         
         elif question_number == 2:
             if any(word in answer_lower for word in ['phone', 'distracted', 'rushing', 'hurried']):
-                return "Thank you — that adds a lot of emotional weight to the moment. Feeling distracted, being on your phone… it makes the experience even more relatable and human."
+                return "Thank you for sharing those details — that adds so much emotional weight to the moment. Feeling distracted, being on your phone… it makes the experience even more relatable and human. I can hear how that context made everything feel more intense. How are you feeling as you share this?"
             elif any(word in answer_lower for word in ['ordinary', 'normal', 'regular', 'typical']):
-                return "Thank you for sharing that. Sometimes the most profound moments happen on the most ordinary days. That contrast can make the experience even more powerful."
+                return "Thank you for sharing that. Sometimes the most profound moments happen on the most ordinary days, and that contrast can make the experience even more powerful. I can hear how unexpected it all was. How are you feeling about sharing this?"
             else:
-                return "Thank you for sharing those details. Understanding what led up to the moment helps us see the full picture of your experience."
+                return "Thank you for sharing those details with such thoughtfulness. Understanding what led up to the moment helps us see the full picture of your experience, and I can hear how important that context is. How are you feeling as you share this?"
         
         elif question_number == 3:
             if any(word in answer_lower for word in ['hurt', 'pain', 'injured', 'bruised']):
-                return "That must've been such a disorienting and jarring few moments — a mix of pain, confusion, and sudden awareness. Those brief moments can feel like they stretch forever."
+                return "Thank you for sharing those details. That must've been such a disorienting and jarring few moments — a mix of pain, confusion, and sudden awareness. Those brief moments can feel like they stretch forever, and I can hear how intense that was for you. How are you feeling as you share this?"
             elif any(word in answer_lower for word in ['help', 'helped', 'someone', 'people']):
-                return "Thank you for sharing that. It's so important to have people there for us in those difficult moments. I'm glad you weren't alone."
+                return "Thank you for sharing that. It's so important to have people there for us in those difficult moments, and I'm glad you weren't alone. I can hear how much that support meant to you. How are you feeling about sharing this?"
             else:
-                return "Thank you for sharing those details. Those first moments after something significant happens can be so intense and confusing."
+                return "Thank you for sharing those details with such openness. Those first moments after something significant happens can be so intense and confusing, and I can hear how overwhelming that was. How are you feeling as you share this?"
         
-        return "Thank you for sharing that with me."
+        return "Thank you for sharing that with me. How are you feeling about our conversation so far?"
     
     def save_answer(self, session_id, question_number, answer_text):
         """Save an answer to a question"""
